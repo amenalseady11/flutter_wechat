@@ -8,6 +8,7 @@ import 'package:flutter_wechat/pages/chat/chat.dart';
 import 'package:flutter_wechat/pages/chat/widgets/bottom_bar_tool_pane.dart';
 import 'package:flutter_wechat/pages/chat/widgets/voice_button.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
+import 'package:flutter_wechat/providers/chat/chat_list.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
@@ -177,7 +178,9 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
     }
 
     message = updated(message) ?? message;
-    return chat.addMessage(message);
+    await chat.addMessage(message);
+    ChatListProvider.of(context, listen: false).sort(forceUpdate: true);
+    return message;
   }
 
   /// 发送文本消息

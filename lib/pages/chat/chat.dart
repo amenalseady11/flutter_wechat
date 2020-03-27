@@ -130,7 +130,7 @@ class ChatPageState extends State<ChatPage> {
           var next = widget.chat.messages[index + 1];
           var duration = next.sendTime.difference(prev.sendTime);
           if (duration.inMinutes < 5) return Container();
-          duration = next.sendTime.difference(DateTime.now());
+          duration = DateTime.now().difference(next.sendTime);
           var text;
           var days = duration.inDays;
           if (days < 1)
