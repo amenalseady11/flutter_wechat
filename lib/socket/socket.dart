@@ -21,12 +21,12 @@ class SocketChannel {
 
 // todo: 1. 待实现连接失败
 // todo: 2. 待实现连接成功后，中途断链，重连机制
-class _Socket {
+class _HttpSocket {
   final Map<String, SocketChannel> _sockets = {};
   Map<String, SocketChannel> get sockets => _sockets;
 
   final HttpClient _client;
-  _Socket._(HttpClient client)
+  _HttpSocket._(HttpClient client)
       : _client = client,
         super();
 
@@ -34,8 +34,8 @@ class _Socket {
 
   StreamController<ChatMessageProvider> messages = StreamController();
 
-  factory _Socket() {
-    return _Socket._(HttpClient());
+  factory _HttpSocket() {
+    return _HttpSocket._(HttpClient());
   }
 
   create(
@@ -219,6 +219,7 @@ class _Socket {
     return;
   }
 
+  /// 暂时还没有实现
   remove(String sourceId, {bool private = false}) {}
 
   dispose() {
@@ -227,4 +228,35 @@ class _Socket {
   }
 }
 
-final socket = _Socket();
+class SocketUtil {
+  _HttpSocket _socket;
+
+  start() => restart();
+
+  restart() {
+    if (this._socket != null) this.stop();
+    this._socket = _HttpSocket();
+  }
+
+  /// 创建长连接
+  /// [private] 是否是私有话题
+  /// [sourceId] 话题编号
+  /// [getOffset] 话题初始偏移量
+  Future create(
+      {@required bool private,
+      @required String sourceId,
+      @required Function getOffset}) {
+    return _socket.create(
+        private: private, sourceId: sourceId, getOffset: getOffset);
+  }
+
+  dispose() => stop();
+
+  stop() {
+    if (this._socket == null) return;
+    this._socket.dispose();
+    this._socket = null;
+  }
+}
+
+var socket = SocketUtil();

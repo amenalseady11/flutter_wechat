@@ -136,6 +136,7 @@ class _HomePageState extends State<HomePage> {
     LogUtil.v("话题列表：${clp.chats.length}", tag: "### HomePage ###");
     if (clp.chats.length > 0) clp.forceUpdate();
 
+    socket.restart();
     socket.create(
         private: true,
         sourceId: global.profile.profileId,

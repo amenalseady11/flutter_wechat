@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
@@ -7,7 +6,7 @@ import 'package:flutter_wechat/util/adapter/adapter.dart';
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    socket.remove(global.profile.profileId, private: true);
+    socket.stop();
     return Scaffold(
       body: Stack(
         alignment: AlignmentDirectional.bottomCenter,
