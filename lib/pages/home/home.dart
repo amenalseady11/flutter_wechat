@@ -65,14 +65,15 @@ class _HomePageState extends State<HomePage> {
   void _initData() async {
     await Future.microtask(() {});
 
-    var database = await SqfliteProvider().connect();
-
-    await Future.wait([
-      database.delete(ChatProvider.tableName),
-      database.delete(ChatMessageProvider.tableName),
-      database.delete(ContactProvider.tableName),
-      database.delete(GroupProvider.tableName),
-    ]);
+    if (global.isDevelopment) {
+      var database = await SqfliteProvider().connect();
+      await Future.wait([
+        database.delete(ChatProvider.tableName),
+        database.delete(ChatMessageProvider.tableName),
+        database.delete(ContactProvider.tableName),
+        database.delete(GroupProvider.tableName),
+      ]);
+    }
 
     await Future.wait([
       Provider.of<GroupListProvider>(context, listen: false).deserialize(),

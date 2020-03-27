@@ -16,7 +16,7 @@ class ChatsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Selector<ChatListProvider, List<ChatProvider>>(
       selector: (BuildContext context, ChatListProvider clp) {
-        return clp.chats.toList();
+        return clp.chats.where((d) => d.visible).toList(growable: false);
       },
       builder: (BuildContext context, List<ChatProvider> chats, Widget child) {
         return ListView.builder(
