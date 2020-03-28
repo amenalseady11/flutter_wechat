@@ -13,8 +13,8 @@ class BottomBarToolPane extends StatelessWidget {
       width: double.maxFinite,
       height: expand ? ew(170) : 0,
       duration: Duration(milliseconds: 100),
-      margin: EdgeInsets.symmetric(vertical: ew(10)),
-      padding: EdgeInsets.only(top: ew(12), left: ew(20)),
+      margin: expand ? EdgeInsets.symmetric(vertical: ew(10)) : null,
+      padding: expand ? EdgeInsets.only(top: ew(12), left: ew(20)) : null,
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: Style.pDividerColor, width: 1),

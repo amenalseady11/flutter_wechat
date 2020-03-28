@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin_record/flutter_plugin_record.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
+import 'package:flutter_wechat/util/style/style.dart';
 
 typedef startRecord = Future Function();
 typedef stopRecord = Future Function();
@@ -17,6 +20,8 @@ class ChatVoiceButton extends StatefulWidget {
   _ChatVoiceButtonState createState() => _ChatVoiceButtonState();
 }
 
+FlutterPluginRecord recordPlugin;
+
 class _ChatVoiceButtonState extends State<ChatVoiceButton> {
   double _start = 0.0;
   double offset = 0.0;
@@ -28,11 +33,11 @@ class _ChatVoiceButtonState extends State<ChatVoiceButton> {
   ///默认隐藏状态
   bool voiceState = true;
   OverlayEntry overlayEntry;
-  FlutterPluginRecord recordPlugin;
 
   @override
   void initState() {
     super.initState();
+    FlutterPluginRecord.alis.values.forEach((d) => d.dispose());
     recordPlugin = new FlutterPluginRecord();
 
     _init();
@@ -167,6 +172,8 @@ class _ChatVoiceButtonState extends State<ChatVoiceButton> {
     } else {
       print("进行发送");
     }
+
+    this.stop();
   }
 
   moveVoiceView() {
@@ -200,44 +207,46 @@ class _ChatVoiceButtonState extends State<ChatVoiceButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: GestureDetector(
-          // onVerticalDragStart: (details) {
-          //   starty = details.globalPosition.dy;
-          //   showVoiceView();
-          // },
-          // onVerticalDragEnd: (details) {
-          //   hideVoiceView();
-          // },
-          // onVerticalDragUpdate: (details) {
-          //   offset = details.globalPosition.dy;
-          //   moveVoiceView();
-          // },
-          onVerticalDragStart: (details) {
-            _start = details.globalPosition.dy;
-            showVoiceView();
-          },
-          onVerticalDragDown: (details) {
-            _start = details.globalPosition.dy;
-            showVoiceView();
-          },
-          onVerticalDragCancel: () => hideVoiceView(),
-          onVerticalDragEnd: (details) => hideVoiceView(),
-          onVerticalDragUpdate: (details) {
-            offset = details.globalPosition.dy;
-            moveVoiceView();
-          },
+    return GestureDetector(
+        // onVerticalDragStart: (details) {
+        //   starty = details.globalPosition.dy;
+        //   showVoiceView();
+        // },
+        // onVerticalDragEnd: (details) {
+        //   hideVoiceView();
+        // },
+        // onVerticalDragUpdate: (details) {
+        //   offset = details.globalPosition.dy;
+        //   moveVoiceView();
+        // },
+        onVerticalDragStart: (details) {
+          _start = details.globalPosition.dy;
+          showVoiceView();
+        },
+        onVerticalDragDown: (details) {
+          _start = details.globalPosition.dy;
+          showVoiceView();
+        },
+        onVerticalDragCancel: () => hideVoiceView(),
+        onVerticalDragEnd: (details) => hideVoiceView(),
+        onVerticalDragUpdate: (details) {
+          offset = details.globalPosition.dy;
+          moveVoiceView();
+        },
+        child: Container(
+          height: ew(100),
           child: RaisedButton(
             color: Colors.white,
+            disabledColor: Colors.white,
+            disabledTextColor: Style.pTextColor,
             disabledElevation: 0,
             highlightElevation: 0,
             elevation: 0,
             child: Text(textShow,
                 style:
                     TextStyle(fontSize: ew(32), fontWeight: FontWeight.w400)),
-            onPressed: () {},
-          )),
-    );
+          ),
+        ));
   }
 
   @override
@@ -245,6 +254,8 @@ class _ChatVoiceButtonState extends State<ChatVoiceButton> {
     if (recordPlugin != null) {
       recordPlugin.dispose();
     }
+    FlutterPluginRecord.alis.values.forEach((d) => d.dispose());
+
     super.dispose();
   }
 }

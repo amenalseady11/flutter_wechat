@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+class GroupMemberRoles {
+  static const int member = 0;
+  static const int master = 1;
+  static const int admin = 2;
+}
+
 class GroupMemberProvider extends ChangeNotifier {
   String groupId;
   String friendId;
@@ -7,6 +13,8 @@ class GroupMemberProvider extends ChangeNotifier {
   String nickname;
   String remark;
   String avatar;
+
+  /// [GroupMemberRoles]
   int role;
 
   ///  1：正常  0：全体禁言
@@ -30,6 +38,10 @@ class GroupMemberProvider extends ChangeNotifier {
     if (nickname != null && nickname.isNotEmpty) return nickname;
     return mobile ?? "";
   }
+
+  get isAdmin => isMaster || role == GroupMemberRoles.admin;
+
+  get isMaster => role == GroupMemberRoles.master;
 
   static GroupMemberProvider fromJson(Map<String, dynamic> json) {
     return GroupMemberProvider(

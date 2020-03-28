@@ -77,23 +77,29 @@ class _AddContactApprovePageState extends State<AddContactApprovePage> {
                 ),
                 Container(
                   margin: EdgeInsets.only(top: ew(60)),
-                  height: ew(80),
+                  height: ew(100),
                   width: double.maxFinite,
                   child: RaisedButton(
                     color: Style.pTintColor,
                     textColor: Colors.white,
+                    highlightElevation: 0,
+                    elevation: 0,
                     child: Text("通过验证", style: TextStyle(fontSize: sp(30))),
                     onPressed: () => _toApprove(1),
                   ),
                 ),
                 Container(
                   margin: EdgeInsets.only(top: ew(50)),
-                  height: ew(80),
+                  height: ew(100),
                   width: double.maxFinite,
                   child: RaisedButton(
                     color: Colors.white,
+                    highlightElevation: 0,
+                    elevation: 0,
 //                    textColor: Colors.white,
-                    child: Text("拒绝验证", style: TextStyle(fontSize: sp(30))),
+                    child: Text("拒绝验证",
+                        style: TextStyle(
+                            fontSize: sp(30), color: Style.sTextColor)),
                     onPressed: () => _toApprove(0),
                   ),
                 )

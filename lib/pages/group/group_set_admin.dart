@@ -176,11 +176,15 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
   }
 
   _setAdmin(BuildContext context, GroupMemberProvider member) async {
-    int role = _isAdmin(member.role) ? 0 : 2;
+    int role =
+        member.isAdmin ? GroupMemberRoles.member : GroupMemberRoles.admin;
     var rsp = await toSetGroupMemberRole(
         groupId: _group.groupId, friendId: member.friendId, role: role);
+    debugPrint(_group.toJson().toString());
+    debugPrint(_group.self.toJson().toString());
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     member.role = role;
+    await _group.serialize(forceUpdate: true);
     if (mounted) setState(() {});
   }
 }

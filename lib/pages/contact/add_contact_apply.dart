@@ -36,11 +36,11 @@ class _AddContactApplyPageState extends State<AddContactApplyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Style.pBackgroundColor,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ew(80)),
         child: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Style.pBackgroundColor,
           actions: <Widget>[
             Container(
               margin: EdgeInsets.only(right: ew(20)),
@@ -59,7 +59,7 @@ class _AddContactApplyPageState extends State<AddContactApplyPage> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: ew(60)),
+        padding: EdgeInsets.symmetric(horizontal: ew(50)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <
             Widget>[
           SizedBox(height: ew(120)),
@@ -75,7 +75,7 @@ class _AddContactApplyPageState extends State<AddContactApplyPage> {
             margin: EdgeInsets.only(top: ew(10)),
             padding: EdgeInsets.symmetric(horizontal: ew(30), vertical: ew(10)),
             decoration: BoxDecoration(
-                color: Style.pBackgroundColor,
+                color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(ew(6)))),
             child: TextField(
               controller: _reason,
@@ -92,7 +92,7 @@ class _AddContactApplyPageState extends State<AddContactApplyPage> {
             margin: EdgeInsets.only(top: ew(10)),
             padding: EdgeInsets.symmetric(horizontal: ew(30), vertical: ew(10)),
             decoration: BoxDecoration(
-                color: Style.pBackgroundColor,
+                color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(ew(6)))),
             child: TextField(
               controller: _remark,

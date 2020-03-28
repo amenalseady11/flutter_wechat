@@ -15,6 +15,7 @@ import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:common_utils/common_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ChatBottomBar extends StatefulWidget {
   @override
@@ -41,10 +42,13 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         border:
             Border(top: BorderSide(color: Style.pDividerColor, width: ew(1))),
       ),
-      padding: EdgeInsets.symmetric(vertical: ew(10), horizontal: ew(10)),
       child: Column(
         children: <Widget>[
-          Row(crossAxisAlignment: CrossAxisAlignment.end, children: children),
+          SizedBox(height: ew(10)),
+          Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: children),
+          SizedBox(height: ew(10)),
           _buildToolPane(context),
         ],
       ),
@@ -60,7 +64,17 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         color: Color(0xFF181818),
         width: ew(60),
       ),
-      onPressed: () {
+      onPressed: () async {
+        if (_keyboard && Platform.isAndroid) {
+          var permissions = await PermissionHandler().requestPermissions([
+            PermissionGroup.speech,
+            PermissionGroup.storage,
+          ]);
+          if (permissions.values.contains(PermissionStatus.denied)) {
+            return Toast.showToast(context, message: "请同意授权！");
+          }
+        }
+
         _keyboard = !_keyboard;
         if (_expand) _expand = false;
         if (mounted) setState(() {});
@@ -69,44 +83,43 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
   }
 
   Widget _buildCenterChild(BuildContext context) {
-    if (_keyboard) {
-      return TextField(
-        controller: _text,
-        minLines: 1,
-        maxLines: 5,
-        cursorColor: Style.pTintColor,
-        style: TextStyle(fontSize: sp(32)),
-        decoration: InputDecoration(
-          fillColor: Colors.white,
-          filled: true,
-          contentPadding:
-              EdgeInsets.symmetric(horizontal: ew(20), vertical: ew(10)),
-          border: InputBorder.none,
-        ),
-        onTap: () {
-          if (_expand) {
-            _expand = false;
-            if (mounted) setState(() {});
-          }
-          ChatPageState.of(context, listen: false)
-              .toScrollEnd(delay: Future.delayed(Duration(milliseconds: 100)));
-        },
-        onChanged: (_) {
-          if (_expand) _expand = false;
+    var input = TextField(
+      controller: _text,
+      minLines: 1,
+      maxLines: 5,
+      cursorColor: Style.pTintColor,
+      style: TextStyle(fontSize: sp(32)),
+      decoration: InputDecoration(
+        fillColor: Colors.white,
+        filled: true,
+        contentPadding:
+            EdgeInsets.symmetric(horizontal: ew(20), vertical: ew(10)),
+        border: InputBorder.none,
+      ),
+      onTap: () {
+        if (_expand) {
+          _expand = false;
           if (mounted) setState(() {});
-          ChatPageState.of(context, listen: false)
-              .toScrollEnd(delay: Future.delayed(Duration(milliseconds: 100)));
-        },
-      );
-    }
-    return Container(
-      height: ew(87),
-      child: ChatVoiceButton(
+        }
+        ChatPageState.of(context, listen: false)
+            .toScrollEnd(delay: Future.delayed(Duration(milliseconds: 100)));
+      },
+      onChanged: (_) {
+        if (_expand) _expand = false;
+        if (mounted) setState(() {});
+        ChatPageState.of(context, listen: false)
+            .toScrollEnd(delay: Future.delayed(Duration(milliseconds: 100)));
+      },
+    );
+
+    return Visibility(
+      visible: _keyboard,
+      child: input,
+      replacement: ChatVoiceButton(
         startRecord: () {
-          if (_expand) {
-            _expand = false;
-            if (mounted) setState(() {});
-          }
+          if (!_expand) return;
+          _expand = false;
+          if (mounted) setState(() {});
         },
         stopRecord: _sendVoice,
       ),
@@ -220,8 +233,9 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
     LogUtil.v("语音路径：$path");
     LogUtil.v("语音时长：$_seconds");
 
-    var seconds = _seconds.round();
-    if (seconds == 0) return;
+    if (_seconds == 0) return;
+    var seconds = _seconds.floor();
+    if (seconds < 1) return Toast.showToast(context, message: "录音时间太短！");
 
     var message = await _createSendMsg(updated: (message) {
       return message

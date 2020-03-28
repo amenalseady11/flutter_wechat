@@ -69,6 +69,8 @@ class _HttpSocket {
       if (rsp.success) offset = rsp.body as int ?? 0;
     }
 
+//    if (global.isDevelopment) offset = 0;
+
     if (global.isDebug)
       LogUtil.v("创建连接:(${private ? '私' : '群'})$socketKey?offset=$offset 开始",
           tag: "### Socket ###");

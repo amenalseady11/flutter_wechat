@@ -102,17 +102,17 @@ class _AddContactAppliesPageState extends State<AddContactAppliesPage> {
   }
 
   _buildChild(BuildContext context) {
-    return ListView.separated(
+    return ListView.builder(
+      shrinkWrap: true,
       itemBuilder: (c, i) => _buildMiniWidget(c, _applies[i]),
-      separatorBuilder: (context, index) {
-        return Container(height: ew(1), color: Style.pDividerColor);
-      },
       itemCount: _applies.length,
     );
   }
 
   _buildMiniWidget(BuildContext c, _AddContactApply item) {
     return Container(
+      decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: Style.pDividerColor))),
       child: ListTile(
         leading: CAvatar(avatar: item.avatar, size: ew(90), radius: ew(8)),
         title: Text(item.nickname),
@@ -122,8 +122,8 @@ class _AddContactAppliesPageState extends State<AddContactAppliesPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              Text("23:59"),
-              SizedBox(width: ew(10)),
+//              Text("23:59"),
+//              SizedBox(width: ew(10)),
               Image.asset("assets/images/icons/tableview_arrow_8x13.png",
                   width: ew(16), height: ew(26))
             ],

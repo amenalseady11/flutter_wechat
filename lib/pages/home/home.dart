@@ -11,11 +11,13 @@ import 'package:flutter_wechat/pages/mine/mine.dart';
 import 'package:flutter_wechat/pages/mine/qr_code_scan.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
+import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/home/home.dart';
+import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
@@ -55,12 +57,6 @@ class _HomePageState extends State<HomePage> {
 
   bool _loading = true;
 
-  set tab(int index) {
-    HomeProvider.of(context, listen: false).tab = index;
-  }
-
-  get tab => HomeProvider.of(context, listen: false).tab;
-
   _remoteUpdate() async {
     var updates = await Future.wait([
       Provider.of<ContactListProvider>(context, listen: false)
@@ -77,15 +73,15 @@ class _HomePageState extends State<HomePage> {
   void _initData() async {
     await Future.microtask(() {});
 
-//    if (global.isDevelopment) {
-//      var database = await SqfliteProvider().connect();
-//      await Future.wait([
-//        database.delete(ChatProvider.tableName),
-//        database.delete(ChatMessageProvider.tableName),
-//        database.delete(ContactProvider.tableName),
-//        database.delete(GroupProvider.tableName),
-//      ]);
-//    }
+    if (false && global.isDevelopment) {
+      var database = await SqfliteProvider().connect();
+      await Future.wait([
+        database.delete(ChatProvider.tableName),
+        database.delete(ChatMessageProvider.tableName),
+        database.delete(ContactProvider.tableName),
+        database.delete(GroupProvider.tableName),
+      ]);
+    }
 
     await Future.wait([
       Provider.of<GroupListProvider>(context, listen: false).deserialize(),
@@ -166,7 +162,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     this._initData();
-    _page = PageController(initialPage: tab);
+    _page = PageController(
+        initialPage: HomeProvider.of(context, listen: false).tab);
     _pages.addAll([
       _HomeSubPage(
           title: "会话",
@@ -219,12 +216,13 @@ class _HomePageState extends State<HomePage> {
     final BottomNavigationBar bottomNavigationBar = BottomNavigationBar(
       items: bars,
       type: BottomNavigationBarType.fixed,
-      currentIndex: tab,
+      currentIndex: HomeProvider.of(context, listen: false).tab,
       fixedColor: Style.pTintColor,
       unselectedItemColor: Style.pTextColor,
       onTap: (int index) {
-        setState(() => tab = index);
-        _page.jumpToPage(tab);
+        HomeProvider.of(context, listen: false).tab = index;
+        if (mounted) setState(() {});
+        _page.jumpToPage(HomeProvider.of(context, listen: false).tab);
       },
       unselectedFontSize: sp(36.0),
       selectedFontSize: sp(36.0),
@@ -241,8 +239,10 @@ class _HomePageState extends State<HomePage> {
             ? ClampingScrollPhysics()
             : NeverScrollableScrollPhysics(),
         onPageChanged: (int index) {
+          var tab = HomeProvider.of(context, listen: false).tab;
           if (tab == index) return;
-          if (mounted) setState(() => tab = index);
+          HomeProvider.of(context, listen: false).tab = index;
+          if (mounted) setState(() {});
         },
       ),
     );
@@ -293,6 +293,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _buildAppBar(BuildContext context) {
+    var tab = HomeProvider.of(context, listen: false).tab;
     var title = _pages[tab].title;
     if (!_pages[tab].showTitle) return null;
     return PreferredSize(

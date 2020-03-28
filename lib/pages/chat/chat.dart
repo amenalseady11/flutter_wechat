@@ -7,6 +7,7 @@ import 'package:flutter_wechat/pages/chat/widgets/message.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
+import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -167,8 +168,12 @@ class ChatPageState extends State<ChatPage> {
           else
             text = DateUtil.formatDate(next.sendTime,
                 format: "yyyy年MM月dd $hours HH:mm");
-          return Center(
-              child: Text(text, style: TextStyle(color: Style.sTextColor)));
+          return Container(
+            padding: EdgeInsets.symmetric(vertical: ew(10)),
+            child: Text(text,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Style.sTextColor, fontSize: sp(24))),
+          );
         },
       ),
     );
@@ -179,35 +184,38 @@ class ChatPageState extends State<ChatPage> {
     var chat = widget.chat;
     var list;
     var limit = 15;
+    try {
+      if (chat.messages.isEmpty) {
+        list = await database.query(ChatMessageProvider.tableName,
+            where: "profileId = ? and sourceId = ? ",
+            whereArgs: [chat.profileId, chat.sourceId],
+            orderBy: "serializeId desc",
+            limit: limit,
+            offset: 0);
+      } else {
+        list = await database.query(ChatMessageProvider.tableName,
+            where: "profileId = ? and sourceId = ? and serializeId < ?",
+            whereArgs: [
+              chat.profileId,
+              chat.sourceId,
+              chat.messages.first.serializeId
+            ],
+            orderBy: "serializeId desc",
+            limit: limit,
+            offset: 0);
+      }
 
-    if (chat.messages.isEmpty) {
-      list = await database.query(ChatMessageProvider.tableName,
-          where: "profileId = ? and sourceId = ? ",
-          whereArgs: [chat.profileId, chat.sourceId],
-          orderBy: "serializeId desc",
-          limit: limit,
-          offset: 0);
-    } else {
-      list = await database.query(ChatMessageProvider.tableName,
-          where: "profileId = ? and sourceId = ? and serializeId < ?",
-          whereArgs: [
-            chat.profileId,
-            chat.sourceId,
-            chat.messages.first.serializeId
-          ],
-          orderBy: "serializeId desc",
-          limit: limit,
-          offset: 0);
-    }
-
-    LogUtil.v("长度:${list.length}", tag: "### ChatPage ###");
-    for (var json in list) {
-      var message = ChatMessageProvider.fromJson(json);
-      chat.messages.insert(0, message);
-    }
-    _refreshController.refreshCompleted();
-    if (mounted && list.isNotEmpty) {
-      setState(() {});
+      LogUtil.v("长度:${list.length}", tag: "### ChatPage ###");
+      for (var json in list) {
+        var message = ChatMessageProvider.fromJson(json);
+        chat.messages.insert(0, message);
+      }
+      _refreshController.refreshCompleted();
+      if (mounted && list.isNotEmpty) {
+        setState(() {});
+      }
+    } catch (e) {
+      _refreshController.refreshCompleted();
     }
   }
 }

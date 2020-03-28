@@ -56,7 +56,7 @@ Future<DioResponse> toSetGroupForbidden(
 /// [role]
 Future<DioResponse> toSetGroupMemberRole(
     {@required String groupId, @required String friendId, @required int role}) {
-  return dio.put(" /group-member/admin", data: {
+  return dio.put("/group-member/admin", data: {
     "GroupID": groupId,
     "GroupMemberID": friendId,
     "GroupMemberRole": role
@@ -68,7 +68,7 @@ Future<DioResponse> toSetGroupNickname(
     {@required String groupId,
     @required String friendId,
     @required String nickname}) {
-  return dio.put(" /group-member/admin", data: {
+  return dio.put("/group-member/nick-name", data: {
     "GroupID": groupId,
     "GroupMemberID": friendId,
     "GroupMemberNickName": nickname

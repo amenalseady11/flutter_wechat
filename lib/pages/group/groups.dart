@@ -65,10 +65,6 @@ class _GroupsPageState extends State<GroupsPage> {
           onTap: () {
             Routers.navigateTo(context,
                 Routers.chat + "?sourceType=1&sourceId=${group.groupId}");
-//            var rst = await Routers.navigateTo(
-//                context, Routers.group + "?groupId=${group.groupId}");
-//            if (rst == true)
-//              GroupListProvider.of(context, listen: false).groups.remove(group);
           },
         ),
         Divider(height: ew(1), color: Style.pDividerColor),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_wechat/apis/apis.dart';
+import 'package:flutter_wechat/providers/home/home.dart';
 import 'package:flutter_wechat/providers/profile/profile.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
@@ -221,7 +222,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
                       : Color(0xFF353535)),
             ),
             child: InkWell(
-              onTap: () => _sendCaptcha(context),
+              onTap: _captchaData.disabled ? null : () => _sendCaptcha(context),
               child: Text(
                 _captchaData.text,
                 style: TextStyle(
@@ -282,6 +283,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
   }
 
   _sendCaptcha(BuildContext context) async {
+    if (_captchaData.disabled) return;
     var phone = _phone.text;
     if (!RegexUtil.isMobileExact(phone))
       return alert(context, content: "手机号码不正确");
@@ -363,6 +365,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
     profile.offset = rsp.body as int ?? 0;
 
     profile.login();
+    HomeProvider.of(context, listen: false).tab = 0;
     Routers.navigateTo(context, Routers.root, clearStack: true);
   }
 }

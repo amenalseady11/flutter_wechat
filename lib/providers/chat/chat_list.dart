@@ -63,7 +63,9 @@ class ChatListProvider extends ChangeNotifier {
         chat.latestMsg = message;
       });
 
-      if (this.chats.length > 0) notifyListeners();
+      if (this.chats.length > 0) {
+        this.sort(forceUpdate: true);
+      }
       return true;
     } catch (e) {
       LogUtil.e(e, tag: "话题列表反序列化异常");
@@ -76,9 +78,8 @@ class ChatListProvider extends ChangeNotifier {
     try {
       var database = await SqfliteProvider().connect();
       var chat = map[sourceId];
-      if (chat.latestMsg != null) {
-        chat.latestMsg = null;
-      }
+      chat.latestMsg = null;
+      chat.messages.clear();
 
       // 删除消息
       database.delete(ChatMessageProvider.tableName,
@@ -86,10 +87,10 @@ class ChatListProvider extends ChangeNotifier {
           whereArgs: [profileId, sourceId]);
 
       if (!real) {
-        chat.visible = false;
         chat.unreadTag = false;
         chat.top = false;
         var rst = chat.serialize(forceUpdate: true);
+        this.sort(forceUpdate: true);
         return rst;
       }
 
@@ -103,7 +104,7 @@ class ChatListProvider extends ChangeNotifier {
           where: "profileId = ? and groupId = ?",
           whereArgs: [profileId, sourceId]);
 
-      notifyListeners();
+      this.sort(forceUpdate: true);
 
       return true;
     } catch (e) {

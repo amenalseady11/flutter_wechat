@@ -16,7 +16,9 @@ class MessageImage extends StatelessWidget {
       margin: message.isSelf
           ? EdgeInsets.only(right: ew(30))
           : EdgeInsets.only(left: ew(30)),
-      color: Colors.white.withOpacity(0.3),
+      decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.3),
+          borderRadius: BorderRadius.all(Radius.circular(ew(6)))),
       constraints: BoxConstraints(maxWidth: ew(150)),
       child: GestureDetector(
           child: message.isLocalFile

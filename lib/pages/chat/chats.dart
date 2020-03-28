@@ -16,7 +16,12 @@ class ChatsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Selector<ChatListProvider, List<ChatProvider>>(
       selector: (BuildContext context, ChatListProvider clp) {
-        return clp.chats.where((d) => d.visible).toList(growable: false);
+        return clp.chats.where((d) {
+          if (!d.visible) return false;
+          if (d.contact != null) return true;
+          if (d.group != null) return true;
+          return false;
+        }).toList(growable: false);
       },
       builder: (BuildContext context, List<ChatProvider> chats, Widget child) {
         return ListView.builder(
@@ -183,7 +188,7 @@ class ChatsPage extends StatelessWidget {
     if (str == "set_top") {
       chat.top = !chat.top;
       await chat.serialize(forceUpdate: false);
-      ChatListProvider.of(context, listen: false).forceUpdate();
+      ChatListProvider.of(context, listen: false).sort(forceUpdate: true);
       LogUtil.v("chat:" + chat.toJson().toString());
     }
 

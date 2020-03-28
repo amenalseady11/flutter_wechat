@@ -18,7 +18,7 @@ import 'package:flutter_wechat/widgets/action_sheet/action_sheet.dart';
 import 'package:flutter_wechat/widgets/avatar/avatar.dart';
 import 'package:photo_view/photo_view.dart';
 
-class ContactPage extends StatelessWidget {
+class ContactPage extends StatefulWidget {
   const ContactPage({Key key, @required this.data}) : super(key: key);
 
   factory ContactPage.fromFriend(
@@ -109,6 +109,11 @@ class ContactPage extends StatelessWidget {
   final _ContactData data;
 
   @override
+  _ContactPageState createState() => _ContactPageState();
+}
+
+class _ContactPageState extends State<ContactPage> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -124,7 +129,7 @@ class ContactPage extends StatelessWidget {
                 color: Color(0xFF333333),
               ),
               onPressed: () {
-                _showActionSheet(context);
+                return _showActionSheet(context);
               },
             )
           ],
@@ -151,7 +156,7 @@ class ContactPage extends StatelessWidget {
             children: <Widget>[
               CAvatar(
                 heroTag: "avatar",
-                avatar: data.avatar,
+                avatar: widget.data.avatar,
                 size: ew(136),
                 radius: ew(8),
                 onTap: () {
@@ -165,7 +170,7 @@ class ContactPage extends StatelessWidget {
                           iconTheme: IconThemeData(color: Colors.white),
                         ),
                         body: PhotoView(
-                          imageProvider: NetworkImage(data.avatar),
+                          imageProvider: NetworkImage(widget.data.avatar),
                           minScale: 1.0,
                           heroAttributes:
                               const PhotoViewHeroAttributes(tag: "avatar"),
@@ -180,18 +185,20 @@ class ContactPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(data.name,
+                  Text(widget.data.name,
                       style:
                           TextStyle(color: Style.pTextColor, fontSize: sp(38))),
                   SizedBox(height: ew(20)),
                   Text(
-                    (data.relation == _ContactRelation.groupMember ? '群' : '') +
-                        "昵称：${data.nickname}",
+                    (widget.data.relation == _ContactRelation.groupMember
+                            ? '群'
+                            : '') +
+                        "昵称：${widget.data.nickname}",
                     style: TextStyle(color: Style.sTextColor, fontSize: sp(26)),
                   ),
                   SizedBox(height: ew(8)),
                   Text(
-                    "手机号：${data.mobile}",
+                    "手机号：${widget.data.mobile}",
                     style: TextStyle(color: Style.sTextColor, fontSize: sp(26)),
                   )
                 ],
@@ -202,23 +209,23 @@ class ContactPage extends StatelessWidget {
   }
 
   _buildDoAction(BuildContext context) {
-    if (data.isFriend) {
+    if (widget.data.isFriend) {
       return _LineButton(
         top: true,
         title: "发送消息",
         icon: "assets/images/contacts/icons_outlined_chats.svg",
         onTap: () {
           Routers.navigateTo(context,
-              "${Routers.chat}?sourceType=${data.sourceType}&sourceId=${data.friendId}");
+              "${Routers.chat}?sourceType=${widget.data.sourceType}&sourceId=${widget.data.friendId}");
         },
       );
     }
 
-    if (data.friendId == global.profile.profileId) {
+    if (widget.data.friendId == global.profile.profileId) {
       // 不是好友
       return _LineButton(
         top: true,
-        title: "发送消息",
+        title: "发送消息(当前用户)",
         color: Colors.grey,
         icon: "assets/images/contacts/icons_outlined_chats.svg",
       );
@@ -230,8 +237,8 @@ class ContactPage extends StatelessWidget {
       title: "添加到联系人",
       icon: "assets/images/contacts/icons_outlined_addfriends.svg",
       onTap: () {
-        Routers.navigateTo(
-            context, "${Routers.addContactApply}?friendId=${data.friendId}");
+        Routers.navigateTo(context,
+            "${Routers.addContactApply}?friendId=${widget.data.friendId}");
       },
     );
   }
@@ -240,35 +247,48 @@ class ContactPage extends StatelessWidget {
     Completer<String> completer = new Completer();
 
     List<Widget> actions = [];
-    actions.add(ActionSheetAction(
-      child: Text('设置备注'),
-      onPressed: () {
-        Navigator.of(context).pop();
-        completer.complete("set_remark");
-      },
-    ));
 
-    if (data.isFriend) {
+    if (widget.data.relation == _ContactRelation.groupMember) {
+      var glp = GroupListProvider.of(context, listen: false);
+      var group = glp.map[widget.data.groupId];
+      if (group.self.isAdmin)
+        actions.add(ActionSheetAction(
+          child: Text('设置群昵称'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            completer.complete("set_group_remark");
+          },
+        ));
+    }
+
+    if (widget.data.isFriend) {
       actions.add(ActionSheetAction(
-        child: Text('把他推荐给朋友'),
+        child: Text('设置朋友备注'),
         onPressed: () {
           Navigator.of(context).pop();
-          completer.complete("recommend_friend");
+          completer.complete("set_remark");
         },
       ));
+//      actions.add(ActionSheetAction(
+//        child: Text('把他推荐给朋友'),
+//        onPressed: () {
+//          Navigator.of(context).pop();
+//          completer.complete("recommend_friend");
+//        },
+//      ));
     }
 
     actions.add(ActionSheetAction(
-      child: Text(data.isBlack ? '移除黑名单' : '加入黑名单'),
+      child: Text(widget.data.isBlack ? '移除黑名单' : '加入黑名单'),
       onPressed: () {
         Navigator.of(context).pop();
         completer.complete("set_black");
       },
     ));
 
-    if (data.isFriend) {
+    if (widget.data.isFriend) {
       actions.add(ActionSheetAction(
-        child: Text('删除'),
+        child: Text('删除', style: TextStyle(color: Colors.red)),
         onPressed: () {
           Navigator.of(context).pop();
           completer.complete("delete_friend");
@@ -291,26 +311,53 @@ class ContactPage extends StatelessWidget {
     var str = await completer.future;
     if (str == "cancel") return;
 
+    if ("set_group_remark" == str) {
+      Future.microtask(() async {
+        var rst = await Routers.navigateTo(
+            context,
+            Routers.groupMemberSetNickname +
+                "?nickname=${Uri.encodeComponent(widget.data.nickname)}");
+
+        if (rst is! String || rst.isEmpty) return;
+        if (rst == widget.data.nickname) return;
+
+        var rsp = await toSetGroupNickname(
+            nickname: rst,
+            groupId: widget.data.groupId,
+            friendId: widget.data.friendId);
+        if (!rsp.success) return Toast.showToast(context, message: rsp.message);
+        var glp = GroupListProvider.of(context, listen: false);
+        var group = glp.map[widget.data.groupId];
+        var member =
+            group.members.firstWhere((d) => d.friendId == widget.data.friendId);
+        widget.data.nickname = rst;
+        member.nickname = rst;
+        group.serialize(forceUpdate: true);
+        if (mounted) setState(() {});
+      });
+      return;
+    }
+
     if ("set_remark" == str) {
       Routers.navigateTo(
           context,
           Routers.contactSetRemark +
-              "?friendId=${data.friendId}&remark=${Uri.encodeFull(data.name)}");
+              "?friendId=${widget.data.friendId}&remark=${Uri.encodeFull(widget.data.name)}");
       return;
     }
 
     // 黑名单
     if ("set_black" == str) {
-      var isBlack = !data.isBlack;
-      var rsp =
-          await toSetBlack(friendId: data.friendId, black: isBlack ? 0 : 1);
+      var isBlack = !widget.data.isBlack;
+      var rsp = await toSetBlack(
+          friendId: widget.data.friendId, black: isBlack ? 0 : 1);
       if (!rsp.success) return Toast.showToast(context, message: rsp.message);
-      data.isBlack = isBlack;
+      widget.data.isBlack = isBlack;
       var clpm = ContactListProvider.of(context, listen: false).map;
-      if (data.relation == _ContactRelation.friend ||
-          clpm.containsKey(data.friendId)) {
-        var contact = clpm[data.friendId];
-        contact.black = data.black;
+      if (widget.data.relation == _ContactRelation.friend ||
+          clpm.containsKey(widget.data.friendId)) {
+        var contact = clpm[widget.data.friendId];
+        contact.black = widget.data.black;
         contact.serialize();
         return;
       }
@@ -322,14 +369,14 @@ class ContactPage extends StatelessWidget {
 
     if ("delete_friend" == str) {
       if (!await confirm(context,
-          title: "确定删除？", content: "删除联系人\"${data.name}\"")) return;
+          title: "确定删除？", content: "删除联系人\"${widget.data.name}\"")) return;
 
-      var rsp = await toDeleteFriend(friendId: data.friendId);
+      var rsp = await toDeleteFriend(friendId: widget.data.friendId);
       if (!rsp.success) return Toast.showToast(context, message: rsp.message);
       await ChatListProvider.of(context, listen: false)
-          .delete(data.friendId, real: true);
+          .delete(widget.data.friendId, real: true);
       await ContactListProvider.of(context, listen: false)
-          .delete(ProfileProvider().profileId, data.friendId);
+          .delete(ProfileProvider().profileId, widget.data.friendId);
       Navigator.pop(context);
       return;
     }
@@ -413,6 +460,10 @@ class _ContactData {
   get avatar => json["avatar"] as String ?? "";
 
   get nickname => json["nickname"] as String ?? "";
+  set nickname(String nickname) {
+    json['nickname'] = nickname;
+  }
+
   get mobile => json["mobile"] as String ?? "";
   get black => json["black"] as int ?? 3;
 

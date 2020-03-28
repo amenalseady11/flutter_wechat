@@ -143,12 +143,14 @@ class _ChatSetContactPageState extends State<ChatSetContactPage> {
 
   _setTopChat(BuildContext context, bool top) {
     _chat.top = !_chat.top;
-    _chat.serialize();
+    if (_chat.top) _chat.visible = true;
+    _chat.serialize(forceUpdate: true);
+    ChatListProvider.of(context, listen: false).sort(forceUpdate: true);
     if (mounted) setState(() {});
   }
 
   _clearChatRecords(BuildContext context) async {
-    if (await confirm(context,
+    if (!await confirm(context,
         content: "确定删除和${contact.name}的聊天记录吗？", okText: "清空")) return;
     await ChatListProvider.of(context, listen: false).delete(_chat.sourceId);
   }

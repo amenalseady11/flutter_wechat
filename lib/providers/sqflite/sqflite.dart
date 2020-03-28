@@ -20,30 +20,23 @@ class SqfliteProvider extends ChangeNotifier {
   Future<sqflite.Database> connect() async {
     if ((await this.database)?.isOpen ?? false) return this.database;
 //    sqflite.Sqflite.setDebugModeOn(global.isDebug);
-    String name = "sqflite";
+    String name = "sqflite20200201";
     int version = 1;
     var basePath = await sqflite.getDatabasesPath();
     var dbPath = path.join(basePath, "$name.db");
     LogUtil.v("sqlflite 数据库地址：\n\t$dbPath", tag: "### SqfliteProvider ###");
     Completer<sqflite.Database> completer = Completer();
     this.database = completer.future;
-    var database = await sqflite.openDatabase(
-      dbPath,
-      version: version,
-      onCreate: (database, version) async {
-        (await rootBundle.loadString("assets/data/sql/create.$version.sql"))
-            .split(";")
-            .forEach((sql) async {
-          if (sql.isEmpty) return;
-          await database.execute(sql);
-        });
-      },
-      onUpgrade: (database, oldVersion, newVersion) async {
-//        String sql = await rootBundle
-//            .loadString("assets/data/sql/upgrade.$newVersion.$oldVersion.sql");
-//        await database.execute(sql);
-      },
-    );
+    var database = await sqflite.openDatabase(dbPath, version: version,
+        onCreate: (database, version) async {
+      (await rootBundle.loadString("assets/data/sql/create.$version.sql"))
+          .replaceAll("\n", "")
+          .split(";")
+          .forEach((sql) async {
+        if (sql.isEmpty) return;
+        await database.execute(sql);
+      });
+    });
     completer.complete(database);
     if (database?.isOpen ?? false) notifyListeners();
     return database;

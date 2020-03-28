@@ -29,7 +29,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
 
   GroupMemberProvider _self;
 
-  get isAdmin => _self.role == 0 || true;
+  get isAdmin => _group.isMaster || _self.role == GroupMemberRoles.admin;
 
   @override
   void initState() {
@@ -285,17 +285,16 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
                 style: TextStyle(color: Style.sTextColor, fontSize: sp(32)),
                 overflow: TextOverflow.ellipsis),
             SizedBox(width: ew(20)),
-            Image.asset("assets/images/icons/tableview_arrow_8x13.png",
-                width: ew(16), height: ew(26))
+//            Image.asset("assets/images/icons/tableview_arrow_8x13.png",
+//                width: ew(16), height: ew(26))
           ]),
         ),
-        onTap: () => _editGroupNickname(context),
       ),
     ]);
   }
 
   _buildPane3(BuildContext context) {
-    if (isAdmin) {
+    if (_self.isMaster) {
       return ListTile(
         title: Text('删除并退出',
             textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
@@ -361,26 +360,9 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     if (mounted) setState(() {});
   }
 
-  _editGroupNickname(BuildContext context) async {
-    var rst = await Routers.navigateTo(
-        context,
-        Routers.groupMemberSetNickname +
-            "?nickname=${Uri.encodeComponent(_self.name)}");
-
-    if (rst is! String || rst.isEmpty) return;
-    if (rst == _self.name) return;
-
-    var rsp = await toSetGroupNickname(
-        nickname: rst, groupId: _group.groupId, friendId: _self.friendId);
-    if (!rsp.success) return Toast.showToast(context, message: rsp.message);
-    _self.nickname = rst;
-    _group.serialize();
-    if (mounted) setState(() {});
-  }
-
   _clearChatRecords(BuildContext context) async {
-    if (await confirm(context, content: "确定删除群的聊天记录吗？", okText: "清空")) return;
-    await ChatListProvider.of(context, listen: false).delete(_group.groupId);
+    if (!await confirm(context, content: "确定删除群的聊天记录吗？", okText: "清空")) return;
+    await ChatListProvider.of(context, listen: false).delete(_chat.sourceId);
   }
 
   _setMuteChat(BuildContext context, bool mute) {
@@ -391,7 +373,9 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
 
   _setTopChat(BuildContext context, bool top) {
     _chat.top = !_chat.top;
-    _chat.serialize();
+    if (_chat.top) _chat.visible = true;
+    _chat.serialize(forceUpdate: true);
+    ChatListProvider.of(context, listen: false).sort(forceUpdate: true);
     if (mounted) setState(() {});
   }
 

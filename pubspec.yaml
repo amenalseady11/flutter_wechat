@@ -67,7 +67,7 @@ dev_dependencies:
   # 语音组件 https://github.com/yxwandroid/flutter_plugin_record
   flutter_plugin_record: ^0.1.3
   # 批量选择图片 https://github.com/Sh1d0w/multi_image_picker
-  multi_image_picker: ^4.6.4
+  # multi_image_picker: ^4.6.4
   # uuid https://github.com/Daegalus/dart-uuid
   uuid: ^2.0.4
   # 音频播放 https://github.com/luanpotter/audioplayer

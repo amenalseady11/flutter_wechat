@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/group/group_member.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 
@@ -31,6 +32,13 @@ class GroupProvider extends ChangeNotifier {
 
   get avatars => members.map((d) => d.avatar).toList();
 
+  GroupMemberProvider get self =>
+      members.firstWhere((d) => d.friendId == profileId) ??
+      GroupMemberProvider();
+
+  bool get isAdmin => isMaster;
+  bool get isMaster => global.profile.profileId == createId;
+
   Map<String, dynamic> toJson() {
     return {
       "serializeId": serializeId,
@@ -54,15 +62,12 @@ class GroupProvider extends ChangeNotifier {
         announcement: json["announcement"] as String,
         createId: json["createId"] as String,
         status: json["status"] as int,
-//        instTime: json['instTime'] == null
-//            ? DateTime.now()
-//            : DateTime.fromMillisecondsSinceEpoch(json['instTime']),
         members: (jsonDecode(json["members"]) as Iterable ?? [])
             .map((json) => GroupMemberProvider.fromJson(json))
             .toList());
   }
 
-  Future<bool> serialize() async {
+  Future<bool> serialize({bool forceUpdate = false}) async {
     try {
       var database = await SqfliteProvider().connect();
 
@@ -82,6 +87,8 @@ class GroupProvider extends ChangeNotifier {
     } catch (e) {
       LogUtil.e(e, tag: "群组序列化:$groupId");
       return false;
+    } finally {
+      if (forceUpdate) notifyListeners();
     }
   }
 
