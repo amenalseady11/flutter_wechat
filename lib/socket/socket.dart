@@ -124,12 +124,9 @@ class _HttpSocket {
           json = jsonDecode(jsonStr);
         } catch (e) {
           if (global.isDebug)
-            LogUtil.v("解析消息流异常(${private ? '私' : '群'}[$sourceId]):",
-                tag: "### Socket ###");
-          if (global.isDebug)
             LogUtil.v("解析消息流文本(${private ? '私' : '群'}[$sourceId]): $jsonStr",
                 tag: "### Socket ###");
-          LogUtil.e(e);
+          LogUtil.e(e, tag: "### Socket ###");
           return;
         }
         String contentType = json["ContentType"];
@@ -161,15 +158,24 @@ class _HttpSocket {
 
         if (message == null || !global.profile.isLogged) return;
 
+        var fromFriendId = json["FormId"] as String ?? "";
+        if (fromFriendId.isEmpty) return;
+
+        /// todo: 暂时过滤掉是自己的发消息，后期处理（需要判断是否已在数据库了）
+        if (fromFriendId == global.profile.friendId) return;
+
+        var sendId = json["MessageId"] as String;
+        if (sendId == null || sendId.isEmpty) sendId = global.uuid;
+
         message
           ..profileId = global.profile.profileId
           ..sourceId = sourceId
-          ..sendId = global.uuid
+          ..sendId = sendId
           ..sendTime =
               DateTime.fromMillisecondsSinceEpoch(json["SendTime"] as int)
           ..type = contentType
           ..body = json["Body"] as String ?? ""
-          ..fromFriendId = json["FormId"] ?? ""
+          ..fromFriendId = fromFriendId
           ..fromNickname = json['NickName'] ?? ""
           ..fromAvatar = json["Avatar"] ?? ""
           ..offset = json["Offset"] as int ?? -1;
@@ -208,9 +214,12 @@ class _HttpSocket {
         }
         clp.sort(forceUpdate: true);
         if (global.isDebug) {
+          debugPrint("");
           LogUtil.v(
-              "\n收到消息:${private ? '私' : '群'}[$sourceId]$contentType(offset:$offset)：${DateUtil.formatDate(message.sendTime)}\n${message.toJson().toString()}\n\n",
+              "收到消息:${private ? '私' : '群'}[$sourceId]$contentType(offset:$offset)：${DateUtil.formatDate(message.sendTime)}",
               tag: "### Socket ###");
+          LogUtil.v(jsonStr, tag: "### Socket ###");
+          debugPrint("");
         }
         return;
       },

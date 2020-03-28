@@ -11,16 +11,15 @@ import 'package:flutter_wechat/pages/mine/mine.dart';
 import 'package:flutter_wechat/pages/mine/qr_code_scan.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
-import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/home/home.dart';
-import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
+import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/widgets/menu/menu.dart';
 import 'package:flutter_wechat/widgets/rotation/rotation.dart';
@@ -62,30 +61,38 @@ class _HomePageState extends State<HomePage> {
 
   get tab => HomeProvider.of(context, listen: false).tab;
 
+  _remoteUpdate() async {
+    var updates = await Future.wait([
+      Provider.of<ContactListProvider>(context, listen: false)
+          .remoteUpdate(context),
+      Provider.of<GroupListProvider>(context, listen: false)
+          .remoteUpdate(context),
+    ]);
+    if (updates.contains(false) &&
+        await confirm(context, content: "网络连接失败，是否重试?", okText: "重试")) {
+      this._remoteUpdate();
+    }
+  }
+
   void _initData() async {
     await Future.microtask(() {});
 
-    if (global.isDevelopment) {
-      var database = await SqfliteProvider().connect();
-      await Future.wait([
-        database.delete(ChatProvider.tableName),
-        database.delete(ChatMessageProvider.tableName),
-        database.delete(ContactProvider.tableName),
-        database.delete(GroupProvider.tableName),
-      ]);
-    }
+//    if (global.isDevelopment) {
+//      var database = await SqfliteProvider().connect();
+//      await Future.wait([
+//        database.delete(ChatProvider.tableName),
+//        database.delete(ChatMessageProvider.tableName),
+//        database.delete(ContactProvider.tableName),
+//        database.delete(GroupProvider.tableName),
+//      ]);
+//    }
 
     await Future.wait([
       Provider.of<GroupListProvider>(context, listen: false).deserialize(),
       Provider.of<ContactListProvider>(context, listen: false).deserialize(),
     ]);
 
-    await Future.wait([
-      Provider.of<ContactListProvider>(context, listen: false)
-          .remoteUpdate(context),
-      Provider.of<GroupListProvider>(context, listen: false)
-          .remoteUpdate(context),
-    ]);
+    await this._remoteUpdate();
 
     await Provider.of<ChatListProvider>(context, listen: false).deserialize();
 

@@ -74,6 +74,8 @@ dev_dependencies:
   audioplayers: ^0.14.2
   # 骨架 https://github.com/hnvn/flutter_shimmer
   shimmer: ^1.1.0
+  # emoji https://github.com/JeffG05/emoji_picker
+  emoji_picker: ^0.1.0
 
 flutter:
 

@@ -24,7 +24,7 @@ class SqfliteProvider extends ChangeNotifier {
     int version = 1;
     var basePath = await sqflite.getDatabasesPath();
     var dbPath = path.join(basePath, "$name.db");
-    LogUtil.v("sqlflite 数据库地址：\n\t$dbPath");
+    LogUtil.v("sqlflite 数据库地址：\n\t$dbPath", tag: "### SqfliteProvider ###");
     Completer<sqflite.Database> completer = Completer();
     this.database = completer.future;
     var database = await sqflite.openDatabase(
@@ -39,9 +39,9 @@ class SqfliteProvider extends ChangeNotifier {
         });
       },
       onUpgrade: (database, oldVersion, newVersion) async {
-        String sql = await rootBundle
-            .loadString("assets/data/sql/upgrade.$newVersion.$oldVersion.sql");
-        await database.execute(sql);
+//        String sql = await rootBundle
+//            .loadString("assets/data/sql/upgrade.$newVersion.$oldVersion.sql");
+//        await database.execute(sql);
       },
     );
     completer.complete(database);

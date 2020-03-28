@@ -106,6 +106,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.9"
+  emoji_picker:
+    dependency: "direct dev"
+    description:
+      name: emoji_picker
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.0"
   fluro:
     dependency: "direct dev"
     description:

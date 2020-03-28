@@ -128,11 +128,8 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         ),
       ),
       replacement: IconButton(
-        icon: SvgPicture.asset(
-          'assets/images/icons/icons_outlined_add2.svg',
-          color: _expand ? Style.pTintColor : Color(0xFF181818),
-          width: ew(60),
-        ),
+        icon: SvgPicture.asset('assets/images/icons/icons_outlined_add2.svg',
+            color: Style.pTextColor, width: ew(60)),
         onPressed: () {
           _expand = !_expand;
           if (_expand)
@@ -211,6 +208,8 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
       return;
     }
 
+    if (rsp.body != null && rsp.body is String && rsp.body.isNotEmpty)
+      message.sendId = rsp.body as String;
     message.status = ChatMessageStatusEnum.complete;
     message.serialize(forceUpdate: true);
     if (mounted) setState(() {});
@@ -263,6 +262,8 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
       return;
     }
 
+    if (rsp.body != null && rsp.body is String && rsp.body.isNotEmpty)
+      message.sendId = rsp.body as String;
     message.status = ChatMessageStatusEnum.complete;
     message.serialize(forceUpdate: true);
     if (mounted) setState(() {});
@@ -317,6 +318,8 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
       return;
     }
 
+    if (rsp.body != null && rsp.body is String && rsp.body.isNotEmpty)
+      message.sendId = rsp.body as String;
     message.status = ChatMessageStatusEnum.complete;
     message.serialize(forceUpdate: true);
     if (mounted) setState(() {});

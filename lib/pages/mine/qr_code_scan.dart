@@ -89,7 +89,7 @@ class _QrCodeScanPageState extends State<QrCodeScanPage> {
 
     // 扫描到了自己的名片
     if (phone == global.profile.mobile) {
-      Routers.navigateTo(context, Routers.home + "?tab=mime",
+      Routers.navigateTo(context, Routers.homeMime,
           clearStack: true,
           transition: TransitionType.fadeIn,
           transitionDuration: Duration(seconds: 0));

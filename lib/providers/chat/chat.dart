@@ -124,16 +124,20 @@ class ChatProvider extends ChangeNotifier {
 
         var rst = this.serializeId =
             await database.insert(ChatProvider.tableName, this.toJson());
-        LogUtil.v("话题信息:$sourceType/$sourceId/insert/success/$rst");
+        LogUtil.v("话题信息:$sourceType/$sourceId/insert/success/$rst",
+            tag: "### ChatProvider ###");
         return rst > 0;
       }
 
       var rst = await database.update(ChatProvider.tableName, this.toJson(),
           where: "serializeId = ?", whereArgs: [this.serializeId]);
-      LogUtil.v("话题信息:$sourceType/$sourceId/update/$rst");
+      LogUtil.v("话题信息:$sourceType/$sourceId/update/$rst",
+          tag: "### ChatProvider ###");
       return rst > 0;
     } catch (e) {
-      LogUtil.e(e, tag: "话题信息:$sourceType/$sourceId/error");
+      LogUtil.v("话题信息:$sourceType/$sourceId/error",
+          tag: "### ChatProvider ###");
+      LogUtil.e(e, tag: "### ChatProvider ###");
       print(Error());
       return false;
     } finally {
@@ -143,7 +147,10 @@ class ChatProvider extends ChangeNotifier {
 
   Future<ChatMessageProvider> addMessage(ChatMessageProvider message) async {
     await message.serialize(forceUpdate: true);
-    this.latestMsg = message;
+    if (this.latestMsg == null ||
+        message.sendTime.compareTo(latestMsg.sendTime) > 0) {
+      this.latestMsg = message;
+    }
     if (message.sendTime.compareTo(this.latestUpdateTime) > 0)
       this.latestUpdateTime = message.sendTime;
     if (!this.visible) this.visible = true;

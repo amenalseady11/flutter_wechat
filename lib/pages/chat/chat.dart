@@ -75,20 +75,23 @@ class ChatPageState extends State<ChatPage> {
     var child = Scaffold(
       backgroundColor: Style.pBackgroundColor,
       appBar: ChatAppBar(),
-      body: Column(children: <Widget>[
-        Expanded(
-          child: Selector<ChatProvider, int>(
-            selector: (context, chat) {
-              return chat.messages.length;
-            },
-            builder: (context, length, child) {
-              LogUtil.v("消息总条数：" + length.toString(), tag: "###ChagePage###");
-              return _buildChild(context, length);
-            },
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 2,
+            child: Selector<ChatProvider, int>(
+              selector: (context, chat) {
+                return chat.messages.length;
+              },
+              builder: (context, length, child) {
+                LogUtil.v("消息总条数：" + length.toString(), tag: "###ChagePage###");
+                return _buildChild(context, length);
+              },
+            ),
           ),
-        ),
-        ChatBottomBar(),
-      ]),
+          ChatBottomBar()
+        ],
+      ),
     );
     return MultiProvider(
       providers: [
@@ -131,20 +134,39 @@ class ChatPageState extends State<ChatPage> {
           var duration = next.sendTime.difference(prev.sendTime);
           if (duration.inMinutes < 5) return Container();
           duration = DateTime.now().difference(next.sendTime);
+
+          var hour = next.sendTime.hour;
+          var hours;
+          if (hour < 6)
+            hours = "凌晨";
+          else if (hour < 8)
+            hours = "早上";
+          else if (hour < 11)
+            hours = "上午";
+          else if (hour < 14)
+            hours = "中午";
+          else if (hour < 18)
+            hours = "下午";
+          else if (hour < 20)
+            hours = "傍晚";
+          else if (hour < 24) hours = "晚上";
+
           var text;
           var days = duration.inDays;
           if (days < 1)
-            text = DateUtil.formatDate(next.sendTime, format: "HH:mm");
+            text = DateUtil.formatDate(next.sendTime, format: "$hours HH:mm");
           else if (days < 2)
-            text = DateUtil.formatDate(next.sendTime, format: "昨天 HH:mm");
+            text =
+                DateUtil.formatDate(next.sendTime, format: "昨天 $hours HH:mm");
           else if (days < 7)
             text = DateUtil.getZHWeekDay(next.sendTime).substring(2) +
-                DateUtil.formatDate(next.sendTime, format: " HH:mm");
+                DateUtil.formatDate(next.sendTime, format: " $hours HH:mm");
           else if (next.sendTime.year == DateTime.now().year)
-            text = DateUtil.formatDate(next.sendTime, format: "MM月dd日 HH:mm");
+            text = DateUtil.formatDate(next.sendTime,
+                format: "MM月dd日 $hours HH:mm");
           else
-            text =
-                DateUtil.formatDate(next.sendTime, format: "yyyy年MM月dd HH:mm");
+            text = DateUtil.formatDate(next.sendTime,
+                format: "yyyy年MM月dd $hours HH:mm");
           return Center(
               child: Text(text, style: TextStyle(color: Style.sTextColor)));
         },

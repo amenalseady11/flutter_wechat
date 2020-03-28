@@ -55,6 +55,18 @@ class Routers {
   /// 主页
   static const String home = "/home";
 
+  /// 主页 - 聊天列表
+  static const String homeChats = "/home_chats";
+
+  /// 主页 - 联系人列表
+  static const String homeContacts = "/home_contacts";
+
+  /// 主页 - 发现页面
+  static const String homeDiscover = "/home_discover";
+
+  /// 主页 - 我的页面
+  static const String homeMime = "/home_mime";
+
   /// 网页
   static const String webView = "/web_view";
 

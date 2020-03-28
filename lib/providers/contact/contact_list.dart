@@ -121,7 +121,7 @@ class ContactListProvider extends ChangeNotifier {
     LogUtil.v("联系人总插入/更新:$updatedCount条");
     if (updatedCount > 0) this.forceUpdate();
 
-    return updatedCount > 0;
+    return true;
   }
 
   void clear() {

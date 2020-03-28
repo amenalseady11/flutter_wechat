@@ -162,18 +162,18 @@ class ChatMessageProvider extends ChangeNotifier {
 
         var rst = this.serializeId =
             await database.insert(ChatMessageProvider.tableName, this.toJson());
-        LogUtil.v("插入消息信息:$rst");
+        LogUtil.v("插入消息信息:$rst", tag: "### ChatMessageProvider ###");
         return rst > 0;
       }
 
       var rst = await database.update(
           ChatMessageProvider.tableName, this.toJson(),
           where: "serializeId = ?", whereArgs: [this.serializeId]);
-      LogUtil.v("更新消息信息:$rst");
+      LogUtil.v("更新消息信息:$rst", tag: "### ChatMessageProvider ###");
 
       return rst > 0;
     } catch (e) {
-      LogUtil.v("聊天信息异常:$sourceId,$type");
+      LogUtil.v("聊天信息异常:$sourceId,$type", tag: "### ChatMessageProvider ###");
       LogUtil.e(e);
       return false;
     } finally {
