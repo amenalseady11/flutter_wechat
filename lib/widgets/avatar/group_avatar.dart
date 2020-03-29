@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 var row = 0, column = 0;
 
@@ -64,14 +65,12 @@ class GroupAvatar extends StatelessWidget {
       }
     }
     return Container(
-      width: size,
-      height: size,
+      width: size + padding * 2,
+      height: size + padding * 2,
       decoration: BoxDecoration(
           color: Style.pDividerColor,
           borderRadius: BorderRadius.all(Radius.circular(radius ?? ew(6)))),
-      padding: EdgeInsets.only(
-        top: padding,
-      ),
+      padding: EdgeInsets.all(padding),
       alignment: AlignmentDirectional.bottomCenter,
       child: Stack(
         children: stacks,
@@ -81,11 +80,23 @@ class GroupAvatar extends StatelessWidget {
 }
 
 _weChatGroupChatChildIcon(String avatar, double width) {
-  return Image.network(
-    avatar,
-    height: width,
-    width: width,
-    fit: BoxFit.fill,
+  return Container(
+    decoration:
+        BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(ew(4)))),
+    child: CachedNetworkImage(
+      imageUrl: avatar,
+      height: width,
+      width: width,
+      fit: BoxFit.fill,
+      placeholder: (context, url) {
+        return Container(
+            decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.all(Radius.circular(ew(4)))),
+            height: width,
+            width: width);
+      },
+    ),
   );
 }
 

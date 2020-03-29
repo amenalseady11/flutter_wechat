@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/global/global.dart';
+import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/group/group_member.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
+import 'package:flutter_wechat/apis/apis.dart';
+import 'package:flutter_wechat/util/toast/toast.dart';
 
 class GroupProvider extends ChangeNotifier {
   static const String tableName = "t_group";
@@ -16,6 +19,9 @@ class GroupProvider extends ChangeNotifier {
   String createId;
   int status;
   DateTime instTime;
+
+  bool _fetching = false;
+  bool get fetching => _fetching;
 
   GroupProvider(
       {this.serializeId,
@@ -97,5 +103,16 @@ class GroupProvider extends ChangeNotifier {
     group.profileId = this.profileId;
     var rst = jsonEncode(this.toJson()) == jsonEncode(group.toJson());
     return rst;
+  }
+
+  remoteUpdate(BuildContext context) async {
+    if (this._fetching) return;
+    this._fetching = true;
+    var rsp = await toGetGroup(groupId: groupId);
+    if (!rsp.success) Toast.showToast(context, message: rsp.message);
+    this._fetching = false;
+    var glp = GroupListProvider.of(context, listen: false);
+    await glp.saveGroupByMap(rsp.body, updateMembers: true);
+    glp.forceUpdate();
   }
 }

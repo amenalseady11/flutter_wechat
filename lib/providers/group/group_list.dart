@@ -93,8 +93,9 @@ class GroupListProvider extends ChangeNotifier {
     return group;
   }
 
-  Future<GroupProvider> saveGroupByMap(Map<String, dynamic> json) {
-    return saveGroup(convertGroup(json));
+  Future<GroupProvider> saveGroupByMap(Map<String, dynamic> json,
+      {bool updateMembers = false}) {
+    return saveGroup(convertGroup(json), updateMembers: updateMembers);
   }
 
   Future<bool> remoteUpdate(BuildContext context) async {
@@ -130,8 +131,19 @@ class GroupListProvider extends ChangeNotifier {
     }
 
     LogUtil.v("删除已退出/解散的群组: $rst条", tag: "GroupListProvider");
+    Future.microtask(() async {
+      for (var group in this.groups) {
+        if (group.members.length > 0) continue;
+        if (group.fetching) continue;
+        group.remoteUpdate(context);
+      }
+    });
 
     notifyListeners();
     return true;
+  }
+
+  forceUpdate() {
+    notifyListeners();
   }
 }

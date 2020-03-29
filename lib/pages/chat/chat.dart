@@ -38,6 +38,9 @@ class ChatPageState extends State<ChatPage> {
     super.initState();
 
     Future.microtask(() async {
+      var chat = ChatProvider.of(context, listen: false);
+      chat.group?.remoteUpdate(context);
+
       await this._onRefresh();
 
       /// 激活状态，保证监听的消息，持续化消息，同时必须添加到消息列表中

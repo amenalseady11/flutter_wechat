@@ -60,6 +60,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
       if (!rsp.success) Toast.showToast(context, message: rsp.message);
       _group = glp.convertGroup(rsp.body);
       await glp.saveGroup(_group);
+      glp.forceUpdate();
       if (mounted) setState(() {});
     });
   }

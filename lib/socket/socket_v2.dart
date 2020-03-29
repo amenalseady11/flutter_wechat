@@ -35,8 +35,7 @@ class SocketState {
   const SocketState(this.private, this.sourceId, this.state);
 }
 
-// TODO: 1. 待实现连接失败
-// TODO: 2. 待实现连接成功后，中途断链，重连机制
+// TODO: 没有办法验证重连机制
 class SocketUtil {
   static SocketUtil _instance = SocketUtil._();
   Map<String, Socket> _sockets = {};
@@ -98,6 +97,9 @@ class SocketUtil {
           sourceId: private ? global.profile.friendId : sourceId);
       if (rsp.success) offset = rsp.body as int ?? 0;
     }
+
+    /// TODO: 开发模式调试，获取全部消息
+    if (global.isDevelopment) offset = 0;
 
     if (global.isDebug)
       LogUtil.v("创建连接:(${private ? '私' : '群'})$socketKey?offset=$offset 开始",

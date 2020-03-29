@@ -78,6 +78,7 @@ class _HomePageState extends State<HomePage> {
 
     await Future.microtask(() {});
 
+    /// TODO: 开发模式调试，清空数据库
     if (global.isDevelopment) {
       var database = await SqfliteProvider().connect();
       await Future.wait([
