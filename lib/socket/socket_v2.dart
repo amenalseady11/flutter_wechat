@@ -202,7 +202,7 @@ class SocketUtil {
           print(jsonStr);
           return;
         } else if (MessageType.expelGroup == contentType) {
-          http.close(force: true);
+          print(jsonStr);
           return;
         }
 
