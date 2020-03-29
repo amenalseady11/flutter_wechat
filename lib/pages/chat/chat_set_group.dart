@@ -319,6 +319,9 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     await ChatListProvider.of(context, listen: false)
         .delete(_group.groupId, real: true);
     Navigator.pop(context, true);
+    Routers.navigateTo(context, Routers.homeContacts,
+        transition: TransitionType.fadeIn, clearStack: true);
+    Toast.showToast(context, message: "解散成功");
   }
 
   _signOutGroup(BuildContext context) async {
@@ -330,7 +333,9 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     GroupListProvider.of(context, listen: false).groups.remove(_group);
     await ChatListProvider.of(context, listen: false)
         .delete(_group.groupId, real: true);
-    Navigator.pop(context, true);
+    Routers.navigateTo(context, Routers.homeContacts,
+        transition: TransitionType.fadeIn, clearStack: true);
+    Toast.showToast(context, message: "退出成功");
   }
 
   _editGroupName(BuildContext context) async {
