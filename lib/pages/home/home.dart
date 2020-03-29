@@ -71,6 +71,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _initData() async {
+    if (socket.started) {
+      _loading = false;
+      return;
+    }
+
     await Future.microtask(() {});
 
     if (global.isDevelopment) {

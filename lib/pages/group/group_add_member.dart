@@ -7,6 +7,7 @@ import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/routers/routers.dart';
+import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
@@ -217,6 +218,9 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
 
       var group = await GroupListProvider.of(context, listen: false)
           .saveGroupByMap(rsp.body);
+
+      socket.create(
+          private: false, sourceId: group.groupId, getOffset: () => 0);
 
       /// 这个位置最好返回群组信息
       /// 直接进入群聊聊天界面

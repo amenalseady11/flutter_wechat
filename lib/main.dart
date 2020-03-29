@@ -38,6 +38,8 @@ main() async {
   shared.sharedPreferences = await SharedPreferences.getInstance();
   ProfileProvider().deserialize();
 
+  LogUtil.v("token: ${global.profile.authToken}", tag: "### main ###");
+
   String version = global.pkg.version;
   String buildNumber = global.pkg.buildNumber;
 

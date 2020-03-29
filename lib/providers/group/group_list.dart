@@ -93,7 +93,7 @@ class GroupListProvider extends ChangeNotifier {
     return group;
   }
 
-  saveGroupByMap(Map<String, dynamic> json) {
+  Future<GroupProvider> saveGroupByMap(Map<String, dynamic> json) {
     return saveGroup(convertGroup(json));
   }
 

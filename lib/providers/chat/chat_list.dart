@@ -125,7 +125,9 @@ class ChatListProvider extends ChangeNotifier {
     if (forceUpdate) notifyListeners();
   }
 
-  addChat(ChatProvider chat, {bool sort = false, bool forceUpdate = false}) {
+  addChat(ChatProvider chat,
+      {bool sort = false, bool forceUpdate = false}) async {
+    if (chat.serializeId == null) await chat.serialize(forceUpdate: false);
     chats.add(chat);
     if (sort) this.sort();
     notifyListeners();

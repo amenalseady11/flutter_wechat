@@ -5,6 +5,8 @@ import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:provider/provider.dart';
 
+import 'app_bar_loading.dart';
+
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
@@ -17,10 +19,16 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           if (chat.sourceType == 0) return chat.contact?.name ?? "";
           return "${chat.group?.name ?? ""}(${chat.group?.members?.length ?? 0})";
         },
-        builder: (context, title, child) => Text(
-          title,
-          style: TextStyle(fontSize: sp(32)),
-        ),
+        builder: (context, title, child) {
+          return Row(children: <Widget>[
+            Text(
+              title,
+              style: TextStyle(fontSize: sp(32)),
+            ),
+            child
+          ]);
+        },
+        child: AppBarLoading(chat: ChatProvider.of(context, listen: false)),
       ),
       actions: <Widget>[
         IconButton(

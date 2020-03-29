@@ -46,10 +46,6 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
     return members;
   }
 
-  bool _isAdmin(int role) {
-    return role == 0 || role == 1;
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -150,10 +146,10 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
                 padding: EdgeInsets.symmetric(vertical: ew(24)),
                 width: ew(140),
                 child: RaisedButton(
-                  color: Style.pTintColor,
+                  color: member.isAdmin ? Colors.redAccent : Style.pTintColor,
                   textColor: Colors.white,
                   elevation: 0.0,
-                  child: _isAdmin(member.role) ? Text("设置") : Text("取消"),
+                  child: !member.isAdmin ? Text("设置") : Text("取消"),
                   onPressed: () => _setAdmin(context, member),
                 ),
               ),
@@ -165,13 +161,22 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
 
   getTrailing(BuildContext context, GroupMemberProvider member) {
     List<String> rst = [];
-    if (member.friendId == _group.createId) {
-      rst.add("群主");
-    }
     if (member.friendId == global.profile.friendId) {
       rst.add("本人");
     }
-    if (rst.isNotEmpty) return Text(rst.join("/"));
+    if (member.friendId == _group.createId) {
+      rst.add("群主");
+    }
+    if (rst.isNotEmpty)
+      return Container(
+          padding: EdgeInsets.symmetric(vertical: ew(24)),
+          width: ew(140),
+          child: RaisedButton(
+            disabledTextColor: Colors.white70,
+            disabledElevation: 0,
+            child: Text(rst.join("/")),
+            onPressed: null,
+          ));
     return null;
   }
 

@@ -11,7 +11,7 @@ import 'package:flutter_wechat/providers/chat/chat_list.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 
-enum SocketStateEnum { normal, creating, connecting, error }
+enum SocketStateEnum { normal, creating, connecting, error, stop }
 
 class Socket {
   final String label;
@@ -41,13 +41,17 @@ class SocketUtil {
   static SocketUtil _instance = SocketUtil._();
   Map<String, Socket> _sockets = {};
   // ignore: close_sinks
-  StreamController<SocketState> stream;
+  StreamController<SocketState> stateStream = StreamController.broadcast();
 
   SocketUtil._();
 
+  bool _started = false;
+
+  bool get started => _started;
+
   SocketUtil start() {
     this.stop();
-    this.stream = StreamController.broadcast();
+    this._started = true;
     return this;
   }
 
@@ -74,7 +78,7 @@ class SocketUtil {
     if (socket.state == SocketStateEnum.creating) return;
     if (socket.state == SocketStateEnum.connecting) return;
     socket.state = SocketStateEnum.creating;
-    this.stream.add(SocketState(private, sourceId, socket.state));
+    this.stateStream.add(SocketState(private, sourceId, socket.state));
 
     var http = socket._client;
 
@@ -121,7 +125,7 @@ class SocketUtil {
             tag: "### Socket ###");
 
       socket.state = SocketStateEnum.error;
-      this.stream.add(SocketState(private, sourceId, socket.state));
+      this.stateStream.add(SocketState(private, sourceId, socket.state));
       await Future.delayed(Duration(milliseconds: 1000));
       return create(private: private, sourceId: sourceId, getOffset: getOffset);
     }
@@ -131,7 +135,7 @@ class SocketUtil {
           tag: "### Socket ###");
 
     socket.state = SocketStateEnum.connecting;
-    this.stream.add(SocketState(private, sourceId, socket.state));
+    this.stateStream.add(SocketState(private, sourceId, socket.state));
 
     Map<String, Future<ChatProvider>> locks = {};
 
@@ -141,6 +145,11 @@ class SocketUtil {
     var subscription;
     subscription = stream.listen(
       (jsonStr) async {
+        if (socket.state != SocketStateEnum.connecting) {
+          socket.state = SocketStateEnum.connecting;
+          this.stateStream.add(SocketState(private, sourceId, socket.state));
+        }
+
         if (subscription != null && !global.profile.isLogged) {
           if (global.isDebug)
             LogUtil.v("取消订阅(${private ? '私' : '群'}[$sourceId])",
@@ -249,12 +258,13 @@ class SocketUtil {
                 sourceType:
                     private ? ChatSourceType.contact : ChatSourceType.group,
                 sourceId: message.sourceId);
+            chat.profileId = global.profile.profileId;
           }
         }
 
         await chat.addMessage(message);
         if (completer != null) {
-          clp.addChat(chat, sort: true, forceUpdate: true);
+          await clp.addChat(chat, sort: true, forceUpdate: true);
           completer.complete(chat);
         }
         clp.sort(forceUpdate: true);
@@ -268,7 +278,36 @@ class SocketUtil {
         }
         return;
       },
-      cancelOnError: true,
+      onDone: () {
+        if (!_sockets.containsKey(socketKey)) return;
+        socket.state = SocketStateEnum.stop;
+        this.stateStream.add(SocketState(private, sourceId, socket.state));
+        return create(
+            private: private, sourceId: sourceId, getOffset: getOffset);
+      },
+      onError: (error) async {
+        if (!_sockets.containsKey(socketKey)) return;
+        socket.state = SocketStateEnum.error;
+        this.stateStream.add(SocketState(private, sourceId, socket.state));
+        int maxCount = 20;
+        await Future.doWhile(() async {
+          if (!_sockets.containsKey(socketKey)) return false;
+          if (maxCount-- <= 0) return false;
+          LogUtil.v(
+              "等待重连-第${20 - maxCount}次(${private ? '私' : '群'}[$sourceId])",
+              tag: "### Sokcet ###");
+          if (socket.state == SocketStateEnum.connecting) return false;
+          await Future.delayed(Duration(milliseconds: 1500));
+          return true;
+        });
+
+        if (!_sockets.containsKey(socketKey)) return;
+        if (socket.state == SocketStateEnum.connecting) return;
+        this.stateStream.add(SocketState(private, sourceId, socket.state));
+        return create(
+            private: private, sourceId: sourceId, getOffset: getOffset);
+      },
+      cancelOnError: false,
     );
     return;
   }
@@ -285,10 +324,17 @@ class SocketUtil {
 
   /// 停止
   stop() {
+    this._started = false;
     _sockets.values.forEach((d) => d.close(force: true));
     _sockets.clear();
-    this.stream?.close();
+  }
+
+  SocketState getSocketState({private, String sourceId}) {
+    String socketKey = private ? "/topic/private" : "/topic/group/$sourceId";
+    if (!_sockets.containsKey(socketKey))
+      return SocketState(private, sourceId, SocketStateEnum.normal);
+    return SocketState(private, sourceId, _sockets[socketKey].state);
   }
 }
 
-var socket = SocketUtil._instance;
+SocketUtil socket = SocketUtil._instance;
