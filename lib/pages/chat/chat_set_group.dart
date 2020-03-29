@@ -29,7 +29,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
 
   GroupMemberProvider _self;
 
-  get isAdmin => _group.isMaster || _self.role == GroupMemberRoles.admin;
+  get isMaster => _group.isMaster || _self.isMaster;
+  get isAdmin => _group.isMaster || _self.isAdmin;
 
   @override
   void initState() {
@@ -294,7 +295,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
   }
 
   _buildPane3(BuildContext context) {
-    if (_self.isMaster) {
+    if (isMaster) {
       return ListTile(
         title: Text('删除并退出',
             textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
@@ -315,6 +316,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     await ChatListProvider.of(context, listen: false)
         .delete(_group.groupId, real: true);
     GroupListProvider.of(context, listen: false).groups.remove(_group);
+    await ChatListProvider.of(context, listen: false)
+        .delete(_group.groupId, real: true);
     Navigator.pop(context, true);
   }
 
@@ -325,6 +328,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     await ChatListProvider.of(context, listen: false)
         .delete(_group.groupId, real: true);
     GroupListProvider.of(context, listen: false).groups.remove(_group);
+    await ChatListProvider.of(context, listen: false)
+        .delete(_group.groupId, real: true);
     Navigator.pop(context, true);
   }
 

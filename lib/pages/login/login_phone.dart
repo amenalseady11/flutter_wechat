@@ -8,6 +8,7 @@ import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter_wechat/util/style/style.dart';
+import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:flutter_wechat/widgets/button/image_button.dart';
 import 'package:flutter_wechat/widgets/mh_text_field/mh_text_field.dart';
 import 'package:jwt_decode/jwt_decode.dart';
@@ -123,7 +124,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
                 style: TextStyle(color: Style.pTextColor, fontSize: sp(32)),
               ),
               onTap: () {
-                alert(context, content: "暂未支持国家/地区选择");
+                Toast.showToast(context, message: "暂未支持国家/地区选择");
               },
             ),
           ),
@@ -153,7 +154,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
                   fontWeight: FontWeight.w500),
             ),
             onChanged: (value) {
-              alert(context, content: "$value");
+              Toast.showToast(context, message: "$value");
             },
           ),
         ),
@@ -286,7 +287,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
     if (_captchaData.disabled) return;
     var phone = _phone.text;
     if (!RegexUtil.isMobileExact(phone))
-      return alert(context, content: "手机号码不正确");
+      return Toast.showToast(context, message: "手机号码不正确");
 
     var content = "我们将发送验证码短信到这个号码：${_phone.text}";
     if (!await confirm(context, content: content, title: "确认手机号码")) return;
@@ -301,7 +302,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
         ..text = "获取验证码"
         ..disabled = false;
       if (mounted) setState(() {});
-      return alert(context, content: rsp.message);
+      return Toast.showToast(context, message: rsp.message);
     }
 
     const max = 60;
@@ -332,7 +333,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
         await toLoginOrRegister(mobile: _phone.text, captcha: _captcha.text);
     if (!rsp.success) {
       _loading = false;
-      return alert(context, content: rsp.message);
+      return Toast.showToast(context, message: rsp.message);
     }
 
     var profile = ProfileProvider.of(context, listen: false);
@@ -348,7 +349,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
     if (!rsp.success) {
       _loading = false;
       profile.authToken = null;
-      return alert(context, content: rsp.message);
+      return Toast.showToast(context, message: rsp.message);
     }
 
     profile.avatar = rsp.body["Avatar"] as String ?? "";
@@ -358,7 +359,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
     if (!rsp.success) {
       _loading = false;
       profile.authToken = null;
-      return alert(context, content: rsp.message);
+      return Toast.showToast(context, message: rsp.message);
     }
 
     _loading = false;

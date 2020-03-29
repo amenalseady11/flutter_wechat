@@ -56,16 +56,16 @@ class Routers {
   static const String home = "/home";
 
   /// 主页 - 聊天列表
-  static const String homeChats = "/home_chats";
+  static const String homeChats = "/home?tab=chats";
 
   /// 主页 - 联系人列表
-  static const String homeContacts = "/home_contacts";
+  static const String homeContacts = "/home?tab=contacts";
 
   /// 主页 - 发现页面
-  static const String homeDiscover = "/home_discover";
+  static const String homeDiscover = "/home?tab=discover";
 
   /// 主页 - 我的页面
-  static const String homeMime = "/home_mime";
+  static const String homeMime = "/home?tab=mime";
 
   /// 网页
   static const String webView = "/web_view";

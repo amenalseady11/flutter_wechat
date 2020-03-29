@@ -114,7 +114,7 @@ class _AddContactApplyPageState extends State<AddContactApplyPage> {
         remark: _remark.text);
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     Toast.showToast(context, message: "发送成功！");
-    Routers.navigateTo(context, Routers.homeChats,
+    Routers.navigateTo(context, Routers.homeContacts,
         clearStack: true, transition: TransitionType.fadeIn);
   }
 }

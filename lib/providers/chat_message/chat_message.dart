@@ -209,8 +209,14 @@ class MessageType {
   static const String notify = "notify/text";
 
   /// 添加好友消息，格式为一个json
-  /// Add friends
-  static const String addFriends = "add-friends/json";
+  /// Add friend
+  static const String addFriend = "add-friend/json";
+
+  /// 添加群组消息，格式为一个json
+  static const String addGroup = "add-to-group/json";
+
+  /// 踢出群组消息，格式为一个json
+  static const String expelGroup = "expel-group/json";
 
   /// 心跳
   static const String heartbeat = "heartbeat/time-stamp";

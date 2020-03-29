@@ -16,6 +16,7 @@ Future<DioResponse> toGetAddFriendApplies({int pageNo = 1, int pageSize = 20}) {
 }
 
 /// 2.3 更新添加好友状态（拒绝/同意）
+/// "State":1 ,   // 1：同意 0：拒绝
 Future<DioResponse> toApproveAddContactApply(
     {@required String applyId,
     @required String friendId,

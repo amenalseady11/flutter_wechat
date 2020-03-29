@@ -8,6 +8,7 @@ import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
+import 'package:flutter_wechat/socket/socket.dart';
 import 'package:provider/provider.dart';
 
 import 'chat.dart';
@@ -93,6 +94,8 @@ class ChatListProvider extends ChangeNotifier {
         this.sort(forceUpdate: true);
         return rst;
       }
+
+      socket.remove(private: false, sourceId: sourceId);
 
       // 删除话题
       await database.delete(ChatProvider.tableName,

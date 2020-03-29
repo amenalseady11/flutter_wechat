@@ -245,6 +245,7 @@ class _ChatVoiceButtonState extends State<ChatVoiceButton> {
             child: Text(textShow,
                 style:
                     TextStyle(fontSize: ew(32), fontWeight: FontWeight.w400)),
+            onPressed: null,
           ),
         ));
   }

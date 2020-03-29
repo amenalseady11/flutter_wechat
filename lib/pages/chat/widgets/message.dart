@@ -20,7 +20,7 @@ class ChatMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.type == MessageType.addFriends) {
+    if (message.type == MessageType.addFriend) {
       return _buildAddFriendMsg(context);
     }
 
