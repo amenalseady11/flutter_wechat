@@ -38,8 +38,7 @@ class ChatPageState extends State<ChatPage> {
     super.initState();
 
     Future.microtask(() async {
-      var chat = ChatProvider.of(context, listen: false);
-      chat.group?.remoteUpdate(context);
+      widget.chat.group?.remoteUpdate(context);
 
       await this._onRefresh();
 
