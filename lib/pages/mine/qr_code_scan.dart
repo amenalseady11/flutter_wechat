@@ -1,13 +1,12 @@
+import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_qr_reader/qrcode_reader_view.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/routers/routers.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:common_utils/common_utils.dart';
 
 class QrCodeScanPage extends StatefulWidget {
   @override
@@ -18,7 +17,7 @@ class QrCodeScanPage extends StatefulWidget {
     PermissionStatus status =
         await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
     if (PermissionStatus.denied != status) return true;
-    await alert(context, content: "请同意开启相机权限");
+    Toast.showToast(context, message: "请同意开启相机权限");
     return false;
   }
 }

@@ -3,8 +3,8 @@ import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/style/style.dart';
+import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:flutter_wechat/widgets/avatar/avatar.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -36,7 +36,7 @@ class _AddContactAppliesPageState extends State<AddContactAppliesPage> {
     rsp.success
         ? _refreshController.refreshCompleted()
         : _refreshController.refreshFailed();
-    if (!rsp.success) return alert(context, content: rsp.message);
+    if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     _applies.clear();
     if (rsp.body == null) return;
     if (rsp.body is Map) {
@@ -56,7 +56,7 @@ class _AddContactAppliesPageState extends State<AddContactAppliesPage> {
     var rsp = await toGetMinisByPage(pageNo: pageNo, pageSize: pageSize);
     _loading = false;
     if (!rsp.success) _refreshController.loadFailed();
-    if (!rsp.success) return alert(context, content: rsp.message);
+    if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     var list = (rsp.body as Iterable) ?? [];
     list.length > 0
         ? _refreshController.loadComplete()

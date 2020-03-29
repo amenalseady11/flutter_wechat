@@ -1,11 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/style/style.dart';
+import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class DiscoverPage extends StatefulWidget {
   @override
@@ -35,7 +35,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     rsp.success
         ? _refreshController.refreshCompleted()
         : _refreshController.refreshFailed();
-    if (!rsp.success) return alert(context, content: rsp.message);
+    if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     if (rsp.body == null) return;
     List<Map> list = [];
     if (rsp.body is Map) {
@@ -54,7 +54,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     var rsp = await toGetMinisByPage(pageNo: pageNo, pageSize: pageSize);
     _loading = false;
     if (!rsp.success) _refreshController.loadFailed();
-    if (!rsp.success) return alert(context, content: rsp.message);
+    if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     var list = (rsp.body as Iterable) ?? [];
     list.length > 0
         ? _refreshController.loadComplete()

@@ -11,11 +11,13 @@ import 'package:flutter_wechat/pages/mine/mine.dart';
 import 'package:flutter_wechat/pages/mine/qr_code_scan.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
+import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/home/home.dart';
+import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
@@ -71,15 +73,15 @@ class _HomePageState extends State<HomePage> {
   void _initData() async {
     await Future.microtask(() {});
 
-//    if (false && global.isDevelopment) {
-//      var database = await SqfliteProvider().connect();
-//      await Future.wait([
-//        database.delete(ChatProvider.tableName),
-//        database.delete(ChatMessageProvider.tableName),
-//        database.delete(ContactProvider.tableName),
-//        database.delete(GroupProvider.tableName),
-//      ]);
-//    }
+    if (global.isDevelopment) {
+      var database = await SqfliteProvider().connect();
+      await Future.wait([
+        database.delete(ChatProvider.tableName),
+        database.delete(ChatMessageProvider.tableName),
+        database.delete(ContactProvider.tableName),
+        database.delete(GroupProvider.tableName),
+      ]);
+    }
 
     await Future.wait([
       Provider.of<GroupListProvider>(context, listen: false).deserialize(),

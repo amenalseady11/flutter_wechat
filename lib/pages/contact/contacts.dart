@@ -141,7 +141,7 @@ class _ContactsPageState extends State<ContactsPage> {
     if ("groups" == key) {
       return Routers.navigateTo(context, Routers.groups);
     }
-//    alert(context, content: "点击$key");
+//    Toast.showToast(context, message: "点击$key");
   }
 }
 

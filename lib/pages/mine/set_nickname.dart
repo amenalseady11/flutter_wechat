@@ -3,7 +3,6 @@ import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/profile/profile.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:flutter_wechat/widgets/mh_text_field/mh_text_field.dart';
@@ -94,7 +93,8 @@ class _SetNicknamePageState extends State<SetNicknamePage> {
   }
 
   void _save(BuildContext context) async {
-    if (_nickname.text.isEmpty) return alert(context, content: "没有输入昵称，请重新填写");
+    if (_nickname.text.isEmpty)
+      return Toast.showToast(context, message: "没有输入昵称，请重新填写");
     var rsp = await toUpdateProfile(nickname: _nickname.text);
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     var pp = ProfileProvider.of(context, listen: false);

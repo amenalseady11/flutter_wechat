@@ -170,14 +170,17 @@ class SocketUtil {
         }
 
         if (MessageType.addFriend == contentType) {
+          print(jsonStr);
           return;
         }
 
         if (MessageType.addGroup == contentType) {
+          print(jsonStr);
           return;
         }
 
         if (MessageType.expelGroup == contentType) {
+          print(jsonStr);
           return;
         }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/style/style.dart';
+import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:flutter_wechat/widgets/mh_text_field/mh_text_field.dart';
 
 ///
@@ -79,7 +79,7 @@ class _ContactSetRemarkState extends State<ContactSetRemark> {
   }
 
   void _save() async {
-    await alert(context, content: "${_remark.text} 暂未实现", title: "新的备注名称");
+    Toast.showToast(context, message: "${_remark.text} 暂未实现");
     Navigator.pop(context);
   }
 }

@@ -4,7 +4,6 @@ import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 
@@ -107,7 +106,8 @@ class _AddContactApplyPageState extends State<AddContactApplyPage> {
   }
 
   _send() async {
-    if (_remark.text.isEmpty) return alert(context, content: "没有输入备注，请重新填写");
+    if (_remark.text.isEmpty)
+      return Toast.showToast(context, message: "没有输入备注，请重新填写");
     var rsp = await toAddFriend(
         friendId: _contact.friendId,
         reason: _reason.text,

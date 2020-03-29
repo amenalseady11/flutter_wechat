@@ -340,7 +340,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
 
   _editGroupName(BuildContext context) async {
     if (!isAdmin) {
-      return alert(context, content: "只有群主及管理员可以编辑群名称");
+      return Toast.showToast(context, message: "只有群主及管理员可以编辑群名称");
     }
     var rst = await Routers.navigateTo(context,
         Routers.groupSetName + "?name=${Uri.encodeComponent(_group.name)}");
@@ -352,7 +352,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
 
   _editGroupAnnouncement(BuildContext context) async {
     if (!isAdmin) {
-      return alert(context, content: "只有群主及管理员可以编辑群公告");
+      return Toast.showToast(context, message: "只有群主及管理员可以编辑群公告");
     }
     var rst = await Routers.navigateTo(
         context,
@@ -390,13 +390,13 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
   }
 
   _setGroupAdmin(BuildContext context) {
-    if (!isAdmin) return alert(context, content: "只有群主及管理员可以设置管理员");
+    if (!isAdmin) return Toast.showToast(context, message: "只有群主及管理员可以设置管理员");
     Routers.navigateTo(
         context, Routers.groupSetAdmin + "?groupId=${_group.groupId}");
   }
 
   _setGroupForbidden(BuildContext context) async {
-    if (!isAdmin) return alert(context, content: "只有群主及管理员可以设置禁言");
+    if (!isAdmin) return Toast.showToast(context, message: "只有群主及管理员可以设置禁言");
 //    Routers.navigateTo(
 //        context, Routers.groupSetForbidden + "?groupId=${_group.groupId}");
     var forbidden = (_self.forbidden + 1) % 2;
