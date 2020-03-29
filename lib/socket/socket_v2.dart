@@ -9,6 +9,8 @@ import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
+import 'package:flutter_wechat/providers/contact/contact_list.dart';
+import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 
 enum SocketStateEnum { normal, creating, connecting, error, stop }
@@ -282,11 +284,21 @@ class SocketUtil {
         }
 
         await chat.addMessage(message);
-        if (completer != null) {
+        if (completer == null) {
+          clp.sort(forceUpdate: true);
+        } else {
           await clp.addChat(chat, sort: true, forceUpdate: true);
+          clp.sort(forceUpdate: true);
           completer.complete(chat);
+
+          // TODO: 暂时暴力解决，没有存在话题，刷新联系人/群组列表
+          if (message.type == MessageType.addFriend) {
+            ContactListProvider().remoteUpdate(null);
+          } else if (message.type == MessageType.addGroup) {
+            GroupListProvider().remoteUpdate(null);
+          }
         }
-        clp.sort(forceUpdate: true);
+
         if (global.isDebug) {
           debugPrint("");
           LogUtil.v(
