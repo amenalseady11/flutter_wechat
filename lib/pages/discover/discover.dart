@@ -118,7 +118,6 @@ class _DiscoverPageState extends State<DiscoverPage> {
               width: ew(16), height: ew(26)),
           onTap: () {
             var url = mini['MiniAddress'];
-            url = "https://www.baidu.com";
             url = Routers.webView +
                 "?title=${Uri.encodeComponent(mini['MiniName'])}&url=${Uri.encodeComponent(url)}";
             Routers.navigateTo(context, url);
