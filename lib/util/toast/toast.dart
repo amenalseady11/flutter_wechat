@@ -88,7 +88,8 @@ class Toast {
       overlayState.insert(_overlayEntry);
     } else {
       //重新绘制UI，类似setState
-      _overlayEntry.markNeedsBuild();
+      if (_overlayEntry.markNeedsBuild is Function)
+        _overlayEntry.markNeedsBuild();
     }
     // 等待时间
     await Future.delayed(Duration(milliseconds: _showTime));

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
@@ -81,10 +82,14 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Flutter Wechat App',
-        localizationsDelegates: [S.delegate, RefreshLocalizations.delegate],
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          S.delegate,
+          RefreshLocalizations.delegate
+        ],
         supportedLocales: S.delegate.supportedLocales,
-        localeResolutionCallback:
-            S.delegate.resolution(fallback: new Locale("en", "")),
+        locale: Locale('zh'),
         theme: ThemeData(
             primaryColor: Color(0xFFEDEDED),
             buttonTheme: ButtonThemeData(minWidth: 44.0),
@@ -102,5 +107,19 @@ class MyApp extends StatelessWidget {
         initialRoute: Routers.root,
       ),
     );
+  }
+}
+
+class LocalRefreshLocalizations extends RefreshLocalizations {
+  LocalRefreshLocalizations(Locale locale) : super(locale);
+  RefreshString get currentLocalization {
+    return values["zh"];
+  }
+
+  static const RefreshLocalizationsDelegate delegate =
+      RefreshLocalizationsDelegate();
+
+  static RefreshLocalizations of(BuildContext context) {
+    return Localizations.of(context, RefreshLocalizations);
   }
 }

@@ -9,12 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^0.1.2
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
 
   # 屏幕适配方案 https://github.com/OpenFlutter/flutter_screenutil
   flutter_screenutil: ^1.0.2
@@ -76,6 +74,12 @@ dev_dependencies:
   shimmer: ^1.1.0
   # emoji https://github.com/JeffG05/emoji_picker
   emoji_picker: ^0.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
 
 flutter:
 

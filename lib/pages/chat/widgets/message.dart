@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_wechat/pages/chat/widgets/message_image.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_wechat/pages/chat/widgets/message_voice.dart';
 import 'package:flutter_wechat/pages/chat/widgets/triangle_painter.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
+import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/widgets/avatar/avatar.dart';
 import 'package:flutter_wechat/widgets/rotation/rotation.dart';
 
@@ -85,10 +85,10 @@ class ChatMessage extends StatelessWidget {
 
   Widget _buildAddFriendMsg(BuildContext context) {
     return Container(
-      color: Colors.red,
-      padding: EdgeInsets.symmetric(vertical: ew(30)),
-      child: Text(message.body.toString()),
-    );
+        padding: EdgeInsets.symmetric(vertical: ew(10)),
+        child: Text(message.body.toString(),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Style.sTextColor, fontSize: sp(24))));
   }
 
   Widget _buildAvatar(BuildContext context) {

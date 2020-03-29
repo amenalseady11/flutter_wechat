@@ -84,46 +84,44 @@ class _DiscoverPageState extends State<DiscoverPage> {
   }
 
   _buildChild(BuildContext context) {
-    return ListView.separated(
+    return ListView.builder(
       padding: EdgeInsets.only(left: 5, right: 5),
       itemBuilder: (c, i) => _buildMiniWidget(c, minis[i]),
-      separatorBuilder: (context, index) {
-        return Container(height: ew(1), color: Style.pDividerColor);
-      },
       itemCount: minis.length,
     );
   }
 
   _buildMiniWidget(BuildContext c, Map mini) {
-    return Column(
-      children: <Widget>[
-        ListTile(
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(ew(6)),
-            child: CachedNetworkImage(
-              imageUrl: mini["MiniLogo"] ?? "",
-              width: ew(72),
-              height: ew(72),
-              placeholder: (context, url) {
-                return Container(
-                    width: ew(72),
-                    height: ew(72),
-                    color: Colors.grey.withOpacity(0.3));
-              },
-            ),
+    return Container(
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(width: ew(1), color: Style.pDividerColor))),
+      child: ListTile(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(ew(6)),
+          child: CachedNetworkImage(
+            imageUrl: mini["MiniLogo"] ?? "",
+            width: ew(72),
+            height: ew(72),
+            placeholder: (context, url) {
+              return Container(
+                  width: ew(72),
+                  height: ew(72),
+                  color: Colors.grey.withOpacity(0.3));
+            },
           ),
-          title: Text(mini["MiniName"] ?? ""),
-          subtitle: Text(mini["MiniDesc"] ?? "'"),
-          trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
-              width: ew(16), height: ew(26)),
-          onTap: () {
-            var url = mini['MiniAddress'];
-            url = Routers.webView +
-                "?title=${Uri.encodeComponent(mini['MiniName'])}&url=${Uri.encodeComponent(url)}";
-            Routers.navigateTo(context, url);
-          },
         ),
-      ],
+        title: Text(mini["MiniName"] ?? ""),
+        subtitle: Text(mini["MiniDesc"] ?? "'"),
+        trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
+            width: ew(16), height: ew(26)),
+        onTap: () {
+          var url = mini['MiniAddress'];
+          url = Routers.webView +
+              "?title=${Uri.encodeComponent(mini['MiniName'])}&url=${Uri.encodeComponent(url)}";
+          Routers.navigateTo(context, url);
+        },
+      ),
     );
   }
 }

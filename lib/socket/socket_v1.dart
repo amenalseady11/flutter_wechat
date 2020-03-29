@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:common_utils/common_utils.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
@@ -283,4 +283,4 @@ class SocketUtil {
   }
 }
 
-var socket = SocketUtil();
+var socketV1 = SocketUtil();

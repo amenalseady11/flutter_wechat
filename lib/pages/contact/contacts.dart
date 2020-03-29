@@ -1,4 +1,5 @@
 import 'package:azlistview/azlistview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/widgets/avatar/avatar.dart';
 import 'package:flutter_wechat/widgets/popup_menu/popup_menu.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class _AzListViewHeaderItem {
   final String title;
@@ -39,25 +41,36 @@ class _ContactsPageState extends State<ContactsPage> {
 
   String _suspensionTag = "";
 
+  var _refreshController = RefreshController(initialRefresh: false);
+
   @override
   void initState() {
     super.initState();
-    ContactListProvider.of(context, listen: false).remoteUpdate(context);
 
-//    Future.microtask(() async {
-//      var rsp = await getUserBriefly(friendId: Profile().profileId);
-//      print('rsp');
-//    });
+    Future.microtask(() {
+      if (ContactListProvider.of(context, listen: false).contacts.isEmpty) {
+        _refreshController.requestRefresh();
+      }
+    });
+  }
+
+  _onRefresh() async {
+    var bool = await ContactListProvider.of(context, listen: false)
+        .remoteUpdate(context);
+
+    bool
+        ? _refreshController.refreshCompleted()
+        : _refreshController.refreshFailed();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("ContactsPage");
     return Consumer<ContactListProvider>(
         builder: (BuildContext context, clp, Widget child) {
-      return Container(
-        width: double.maxFinite,
-        height: double.maxFinite,
+      return SmartRefresher(
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        header: WaterDropHeader(waterDropColor: Style.pTintColor),
         child: AzListView(
           header: _buildAzListViewHeader(context),
           data: clp.contacts,

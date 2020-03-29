@@ -132,13 +132,15 @@ class ChatPageState extends State<ChatPage> {
         },
         separatorBuilder: (BuildContext context, int index) {
           if (index <= 0) return Container();
-          var prev = widget.chat.messages[index];
-          var next = widget.chat.messages[index + 1];
-          var duration = next.sendTime.difference(prev.sendTime);
+          var current = widget.chat.messages[index + 1].sendTime;
+          var next = widget.chat.messages.length > index + 2
+              ? widget.chat.messages[index + 2].sendTime
+              : DateTime.now();
+          var duration = next.difference(current);
           if (duration.inMinutes < 5) return Container();
-          duration = DateTime.now().difference(next.sendTime);
+          duration = DateTime.now().difference(current);
 
-          var hour = next.sendTime.hour;
+          var hour = current.hour;
           var hours;
           if (hour < 6)
             hours = "凌晨";
@@ -157,19 +159,17 @@ class ChatPageState extends State<ChatPage> {
           var text;
           var days = duration.inDays;
           if (days < 1)
-            text = DateUtil.formatDate(next.sendTime, format: "$hours HH:mm");
+            text = DateUtil.formatDate(current, format: "$hours HH:mm");
           else if (days < 2)
-            text =
-                DateUtil.formatDate(next.sendTime, format: "昨天 $hours HH:mm");
+            text = DateUtil.formatDate(current, format: "昨天 $hours HH:mm");
           else if (days < 7)
-            text = DateUtil.getZHWeekDay(next.sendTime).substring(2) +
-                DateUtil.formatDate(next.sendTime, format: " $hours HH:mm");
-          else if (next.sendTime.year == DateTime.now().year)
-            text = DateUtil.formatDate(next.sendTime,
-                format: "MM月dd日 $hours HH:mm");
+            text = DateUtil.getZHWeekDay(current).replaceFirst("星期", "周") +
+                DateUtil.formatDate(current, format: " $hours HH:mm");
+          else if (current.year == DateTime.now().year)
+            text = DateUtil.formatDate(current, format: "MM月dd日 $hours HH:mm");
           else
-            text = DateUtil.formatDate(next.sendTime,
-                format: "yyyy年MM月dd $hours HH:mm");
+            text =
+                DateUtil.formatDate(current, format: "yyyy年MM月dd $hours HH:mm");
           return Container(
             padding: EdgeInsets.symmetric(vertical: ew(10)),
             child: Text(text,

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:common_utils/common_utils.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
@@ -181,22 +181,34 @@ class SocketUtil {
         }
 
         if (MessageType.addFriend == contentType) {
+          // {"MessageId":"64b314b3dded4dcfb7ea9fcc88cdece5","FormId":"-1","NickName":"","Avatar":"","SendTime":1585479059,"Body":"{\"ID\":\"6de44fce1773492dbec882d79d797779\",\"CreatedAt\":\"2020-03-29T10:50:48Z\",\"UpdatedAt\":\"2020-03-29T10:50:59Z\",\"UserID\":\"f72d908583364481ae50f35a9f730486\",\"FriendID\":\"6e6b1cee425e4fc084583a4bbb2768b1\",\"IsBlack\":\"11\",\"IsAgree\":11,\"UtoFRemark\":\"13816881609\",\"FtoURemark\":\"Phone1688\",\"FrUReason\":\"\",\"UrFReason\":\"\"}","Offset":77875,"ContentType":"add-friend/json"}
+          var json2;
+          try {
+            json2 = jsonDecode(json['Body']);
+          } catch (e) {
+            if (global.isDebug)
+              LogUtil.v(
+                  "解析 add friend message error(${private ? '私' : '群'}[$sourceId]): $jsonStr",
+                  tag: "### Socket ###");
+            LogUtil.e(e, tag: "### Socket ###");
+            return;
+          }
+          json['FormId'] = json2['FriendID'];
+          json['Body'] = "我们已是好友，可以开始聊天";
+          json["SendTime"] = json["SendTime"] * 1000;
+        } else if (MessageType.addGroup == contentType) {
           print(jsonStr);
           return;
-        }
-
-        if (MessageType.addGroup == contentType) {
-          print(jsonStr);
-          return;
-        }
-
-        if (MessageType.expelGroup == contentType) {
-          print(jsonStr);
+        } else if (MessageType.expelGroup == contentType) {
+          http.close(force: true);
           return;
         }
 
         ChatMessageProvider message;
-        if (contentType == MessageType.text)
+
+        if (contentType == MessageType.addFriend)
+          message = ChatMessageProvider(status: ChatMessageStatusEnum.complete);
+        else if (contentType == MessageType.text)
           message = ChatMessageProvider(status: ChatMessageStatusEnum.complete);
         else if (contentType == MessageType.urlImg)
           message = ChatMessageProvider(status: ChatMessageStatusEnum.loading);
@@ -261,6 +273,11 @@ class SocketUtil {
                     private ? ChatSourceType.contact : ChatSourceType.group,
                 sourceId: message.sourceId);
             chat.profileId = global.profile.profileId;
+            if (message.type == MessageType.addFriend) {
+              chat.latestUpdateTime = message.sendTime;
+            } else if (message.type == MessageType.addGroup) {
+              chat.latestUpdateTime = message.sendTime;
+            }
           }
         }
 

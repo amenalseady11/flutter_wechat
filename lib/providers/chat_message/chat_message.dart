@@ -151,6 +151,8 @@ class ChatMessageProvider extends ChangeNotifier {
       if (this.serializeId == null || this.serializeId.isNaN) {
         this.serializeId = null;
 
+        if (profileId == null) profileId = global.profile.profileId;
+
         if (this.offset > 0) {
           var list = await database.query(ChatMessageProvider.tableName,
               where: "profileId = ? and sourceId = ? and offset = ?",
