@@ -97,9 +97,20 @@ class _HomePageState extends State<HomePage> {
       _HomeSubPage sub = _pages[i];
       bars.add(
         BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: ew(4)),
-            child: SvgPicture.asset(sub.icon, width: w, height: w),
+          icon: Stack(
+            alignment: Alignment.topRight,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(bottom: ew(4)),
+                child: SvgPicture.asset(sub.icon, width: w, height: w),
+              ),
+              Container(
+                width: ew(20),
+                height: ew(20),
+                decoration:
+                    BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+              )
+            ],
           ),
           activeIcon: Padding(
             padding: EdgeInsets.only(bottom: ew(4)),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/global/global.dart';
@@ -57,6 +59,10 @@ class ChatProvider extends ChangeNotifier {
     if (this.top) return DateTime.now();
     return this.latestUpdateTime;
   }
+
+  // ignore: close_sinks
+  StreamController<ChatMessageProvider> controller =
+      StreamController.broadcast();
 
   get isGroupChat => sourceType == 1 && group != null;
   get isContactChat => sourceType == 0 && contact != null;

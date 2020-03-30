@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +37,8 @@ class ChatPageState extends State<ChatPage> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
+  StreamSubscription _subscription;
+
   @override
   void initState() {
     super.initState();
@@ -53,12 +57,20 @@ class ChatPageState extends State<ChatPage> {
       widget.chat.unread = 0;
       widget.chat.serialize(forceUpdate: true);
     }
+
+    this._subscription = widget.chat.controller.stream.listen((_) {
+      try {
+        this.toScrollEnd(delay: Future.delayed(Duration(milliseconds: 150)));
+      } catch (e) {}
+    });
   }
 
   @override
   void dispose() {
     widget.chat.activating = false;
     widget.chat.messages.clear();
+
+    _subscription?.cancel();
 
     Future.microtask(() async {
       await audio.stop();
@@ -71,6 +83,7 @@ class ChatPageState extends State<ChatPage> {
       {Future delay,
       Duration duration = const Duration(milliseconds: 300)}) async {
     if (delay != null) await delay;
+    if (!mounted) return;
     return scroller.animateTo(scroller.position.maxScrollExtent,
         duration: duration, curve: Curves.ease);
   }
@@ -164,7 +177,7 @@ class ChatPageState extends State<ChatPage> {
         itemCount: length,
         itemBuilder: (context, index) {
           var message = widget.chat.messages[index];
-          return ChangeNotifierProvider.value(
+          var child = ChangeNotifierProvider.value(
             value: message,
             child: Consumer<ChatMessageProvider>(
               builder: (context, message, child) {
@@ -173,6 +186,10 @@ class ChatPageState extends State<ChatPage> {
               },
             ),
           );
+
+          if (index + 1 < length) return child;
+          return Padding(
+              padding: EdgeInsets.only(bottom: ew(60)), child: child);
         },
         separatorBuilder: (BuildContext context, int index) {
           var current = widget.chat.messages[index + 1].sendTime;
@@ -228,7 +245,7 @@ class ChatPageState extends State<ChatPage> {
     var database = await SqfliteProvider().connect();
     var chat = widget.chat;
     var list;
-    var limit = 15;
+    var limit = 10;
     try {
       if (chat.messages.isEmpty) {
         list = await database.query(ChatMessageProvider.tableName,

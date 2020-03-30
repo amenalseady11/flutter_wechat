@@ -10,7 +10,7 @@ import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:flutter_wechat/socket/socket_v2.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
+import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:provider/provider.dart';
 
 abstract class SyncService {
@@ -21,9 +21,9 @@ abstract class SyncService {
       Provider.of<GroupListProvider>(context, listen: false)
           .remoteUpdate(context),
     ]);
-    if (updates.contains(false) &&
-        await confirm(context, content: "网络连接失败，是否重试?", okText: "重试")) {
-      _remoteUpdate(context);
+    if (updates.contains(false)) {
+      Toast.showToast(context, message: "网络连接失败!");
+//      _remoteUpdate(context);
     }
   }
 

@@ -413,6 +413,10 @@ class SocketUtil {
           completer.complete(chat);
         }
 
+        if (chat.activating) {
+          chat.controller.add(message);
+        }
+
         if (global.isDebug) {
           debugPrint("");
           LogUtil.v(

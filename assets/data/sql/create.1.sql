@@ -5,8 +5,7 @@ CREATE TABLE t_contact (
                         UNIQUE,
     profileId    TEXT    NOT NULL,
     friendId    TEXT    NOT NULL,
-    mobile      TEXT    NOT NULL
-                        UNIQUE,
+    mobile      TEXT    NOT NULL,
     nickname    TEXT    NOT NULL,
     remark      TEXT    NOT NULL,
     avatar      TEXT    NOT NULL,
@@ -17,6 +16,7 @@ CREATE TABLE t_contact (
                         DEFAULT (0)
 );
 CREATE UNIQUE INDEX t_contact_unique ON t_contact(profileId, friendId);
+CREATE UNIQUE INDEX t_contact_unique2 ON t_contact(profileId, mobile);
 
 CREATE TABLE t_group (
     serializeId  INTEGER NOT NULL
