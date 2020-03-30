@@ -3,27 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 
-enum ChatMessageStatusEnum {
-  unKnow,
-  complete,
-  sending,
-  sendError,
-  loading,
-  loadError
+abstract class ChatMessageStatus {
+  static const int unKnow = 0;
+  static const int complete = 1;
+  static const int sending = 2;
+  static const int sendError = 3;
+  static const int loading = 4;
+  static const int loadError = 5;
+  static const int withdrawing = 6;
+  static const int withdraw = 7;
 }
 
-List<ChatMessageStatusEnum> chatMessageStatusEnums = [
-  ChatMessageStatusEnum.unKnow,
-  ChatMessageStatusEnum.complete,
-  ChatMessageStatusEnum.sending,
-  ChatMessageStatusEnum.sendError,
-  ChatMessageStatusEnum.loading,
-  ChatMessageStatusEnum.loadError
-];
-
-class ChatMessageStates {
-  static const int voiceUnRead = 0;
-  static const int voiceAlreadyRead = 1;
+abstract class ChatMessageReadStatus {
+  static const int unRead = 0;
+  static const int alreadyRead = 1;
 }
 
 class ChatMessageProvider extends ChangeNotifier {
@@ -39,45 +32,31 @@ class ChatMessageProvider extends ChangeNotifier {
   String toFriendId;
   String sendId;
   DateTime sendTime = DateTime.now();
-  int state = 0;
+
+  /// [ChatMessageStatus]
+  int status = ChatMessageStatus.unKnow;
+
+  /// [ChatMessageReadStatus]
+  int readStatus = ChatMessageReadStatus.unRead;
   int offset = 0;
-
-  /// 附加字段，保留字段1
-  String extra1;
-
-  /// 附加字段，保留字段2
-  String extra2;
-
-  /// 附加字段，保留字段3
-  String extra3;
-
-  /// 附加字段，保留字段4
-  String extra4;
-
-  ChatMessageStatusEnum status = ChatMessageStatusEnum.unKnow;
 
   dynamic _bodyData;
 
-  ChatMessageProvider({
-    this.serializeId,
-    this.profileId,
-    this.sourceId,
-    this.offset = -1,
-    this.type,
-    this.body,
-    this.fromFriendId,
-    this.fromNickname,
-    this.fromAvatar,
-    this.toFriendId,
-    this.sendId,
-    this.sendTime,
-    this.status = ChatMessageStatusEnum.unKnow,
-    this.state = 0,
-    this.extra1,
-    this.extra2,
-    this.extra3,
-    this.extra4,
-  });
+  ChatMessageProvider(
+      {this.serializeId,
+      this.profileId,
+      this.sourceId,
+      this.offset = -1,
+      this.type,
+      this.body,
+      this.fromFriendId,
+      this.fromNickname,
+      this.fromAvatar,
+      this.toFriendId,
+      this.sendId,
+      this.sendTime,
+      this.status = ChatMessageStatus.unKnow,
+      this.readStatus = ChatMessageReadStatus.unRead});
 
   get isPrivateMessage => toFriendId != null && toFriendId.isNotEmpty;
 
@@ -112,12 +91,8 @@ class ChatMessageProvider extends ChangeNotifier {
       fromAvatar: json["fromAvatar"] as String,
       sendId: json["sendId"] as String,
       sendTime: DateTime.fromMillisecondsSinceEpoch(json["sendTime"] as int),
-      status: chatMessageStatusEnums[json['status'] as int ?? 0],
-      state: json['state'] as int ?? 0,
-      extra1: json['extra1'],
-      extra2: json['extra2'],
-      extra3: json['extra3'],
-      extra4: json['extra4'],
+      status: json['status'] as int ?? ChatMessageStatus.unKnow,
+      readStatus: json['readStatus'] as int ?? ChatMessageReadStatus.unRead,
     );
   }
 
@@ -135,12 +110,8 @@ class ChatMessageProvider extends ChangeNotifier {
       "toFriendId": toFriendId,
       "sendId": sendId,
       "sendTime": sendTime?.millisecondsSinceEpoch,
-      "status": status?.index ?? 0,
-      "state": state ?? 0,
-      "extra1": extra1,
-      "extra2": extra2,
-      "extra3": extra3,
-      "extra4": extra4,
+      "status": status ?? ChatMessageStatus.unKnow,
+      "readStatus": readStatus ?? ChatMessageReadStatus.unRead
     };
   }
 

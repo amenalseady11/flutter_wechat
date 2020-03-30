@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +19,11 @@ class SqfliteProvider extends ChangeNotifier {
 
   Future<sqflite.Database> connect() async {
     if ((await this.database)?.isOpen ?? false) return this.database;
-//    sqflite.Sqflite.setDebugModeOn(global.isDebug);
-    String name = "sqflite20200201";
+    String name = "sqflite";
     int version = 1;
     var basePath = await sqflite.getDatabasesPath();
     var dbPath = path.join(basePath, "$name.db");
+//    File(dbPath).deleteSync();
     LogUtil.v("sqlflite 数据库地址：\n\t$dbPath", tag: "### SqfliteProvider ###");
     Completer<sqflite.Database> completer = Completer();
     this.database = completer.future;
@@ -32,6 +33,7 @@ class SqfliteProvider extends ChangeNotifier {
           .replaceAll("\n", "")
           .split(";")
           .forEach((sql) async {
+        LogUtil.v("create: $sql", tag: "### SqfliteProvider ###");
         if (sql.isEmpty) return;
         await database.execute(sql);
       });

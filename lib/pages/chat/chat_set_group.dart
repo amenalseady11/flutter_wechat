@@ -55,11 +55,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     }
 
     Future.microtask(() async {
-      var rsp = await toGetGroup(groupId: widget.groupId);
-      if (!rsp.success) Toast.showToast(context, message: rsp.message);
-      _group = glp.convertGroup(rsp.body);
-      await glp.saveGroup(_group);
-      glp.forceUpdate();
+      _group = _chat.group = (await _group.remoteUpdate(context)) ?? _group;
       if (mounted) setState(() {});
     });
   }
@@ -68,10 +64,17 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('${_group.name}(${_group.members.length})'),
-        centerTitle: false,
-        titleSpacing: -ew(20),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(ew(80)),
+        child: AppBar(
+          title: Text(
+            '${_group.name}(${_group.members.length})',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          centerTitle: false,
+          titleSpacing: -ew(20),
+        ),
       ),
       body: ListView(
         shrinkWrap: true,
@@ -113,6 +116,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
             if (index == len) {
               return _buildDoMemberButton(
                 icon: Icons.add,
+                bgColor: Style.pTintColor,
+                iconColor: Colors.white,
                 onPressed: () {
                   return Routers.navigateTo(context,
                       Routers.groupAddMember + "?groupId=${_group.groupId}");
@@ -124,6 +129,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
             if (index == len + 1) {
               return _buildDoMemberButton(
                   icon: Icons.remove,
+                  bgColor: Colors.redAccent,
+                  iconColor: Colors.white,
                   onPressed: () {
                     return Routers.navigateTo(context,
                         Routers.groupDelMember + "?groupId=${_group.groupId}");
@@ -158,7 +165,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     );
   }
 
-  _buildDoMemberButton({IconData icon, VoidCallback onPressed}) {
+  _buildDoMemberButton(
+      {IconData icon, VoidCallback onPressed, Color bgColor, Color iconColor}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -168,9 +176,10 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
           child: Container(
             width: ew(90),
             height: ew(90),
-            decoration:
-                BoxDecoration(color: Style.pBackgroundColor.withOpacity(0.5)),
-            child: Icon(icon, size: sp(40), color: Colors.black54),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(ew(6))),
+                color: bgColor ?? Style.pBackgroundColor.withOpacity(0.5)),
+            child: Icon(icon, size: sp(60), color: iconColor ?? Colors.black54),
           ),
         ),
         SizedBox(height: ew(10)),
@@ -188,15 +197,18 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
             child: Text('群聊名称', style: TextStyle(fontSize: sp(30)))),
         title: Text(
           _group.name ?? "",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
               color: Style.sTextColor,
               fontSize: sp(32),
               fontWeight: FontWeight.w300),
-          overflow: TextOverflow.ellipsis,
         ),
-        trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
-            width: ew(16), height: ew(26)),
-        onTap: () => _editGroupName(context),
+        trailing: !isAdmin
+            ? null
+            : Image.asset("assets/images/icons/tableview_arrow_8x13.png",
+                width: ew(16), height: ew(26)),
+        onTap: !isAdmin ? null : () => _editGroupName(context),
       ),
 //        Divider(height: ew(1), color: Style.pDividerColor),
 //        ListTile(
@@ -219,40 +231,32 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
           child: Text(_group.announcement ?? "",
               style: TextStyle(color: Style.sTextColor, fontSize: sp(24))),
         ),
-        trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
-            width: ew(16), height: ew(26)),
-        onTap: () => _editGroupAnnouncement(context),
+        trailing: !isAdmin
+            ? null
+            : Image.asset("assets/images/icons/tableview_arrow_8x13.png",
+                width: ew(16), height: ew(26)),
+        onTap: !isAdmin ? null : () => _editGroupAnnouncement(context),
       ),
     ];
 
-    if (isAdmin) {
-      children.addAll([
-        Container(height: ew(16), color: Style.pBackgroundColor),
-        ListTile(
-          title: Container(
-              width: ew(160),
-              child: Text('群主及管理员', style: TextStyle(fontSize: sp(30)))),
-          trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
-              width: ew(16), height: ew(26)),
-          onTap: () => _setGroupAdmin(context),
-        ),
-        Divider(height: ew(1), color: Style.pDividerColor),
-        SwitchListTile(
-          value: _self.forbidden == 0,
-          activeColor: Style.pTintColor,
-          title: Text("全体禁言"),
-          onChanged: (_) => _setGroupForbidden(context),
-        ),
-//        ListTile(
-//          title: Container(
-//              width: ew(160),
-//              child: Text('全体禁言', style: TextStyle(fontSize: sp(30)))),
-//          trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
-//              width: ew(16), height: ew(26)),
-//          onTap: () => _setGroupForbidden(context),
-//        ),
-      ]);
-    }
+    children.addAll([
+      Container(height: ew(16), color: Style.pBackgroundColor),
+      ListTile(
+        title: Container(
+            width: ew(160),
+            child: Text('群主及管理员', style: TextStyle(fontSize: sp(30)))),
+        trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
+            width: ew(16), height: ew(26)),
+        onTap: () => _setGroupAdmin(context),
+      ),
+      Divider(height: ew(1), color: Style.pDividerColor),
+      SwitchListTile(
+        value: _self.forbidden == 0,
+        activeColor: Style.pTintColor,
+        title: Text("全体禁言"),
+        onChanged: (_) => _setGroupForbidden(context),
+      ),
+    ]);
 
     return Column(
       children: children,
@@ -303,23 +307,23 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
       );
     }
 
-    return ListTile(
-      title: Text('退出群聊',
-          textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
-      onTap: () => _signOutGroup(context),
-    );
+    if (isAdmin) {
+      return ListTile(
+        title: Text('退出群聊',
+            textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
+        onTap: () => _signOutGroup(context),
+      );
+    }
+    return Container();
   }
 
   _dismissGroup(BuildContext context) async {
     var rsp = await toDismissGroup(groupId: _group.groupId);
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
-    await ChatListProvider.of(context, listen: false)
-        .delete(_group.groupId, real: true);
     GroupListProvider.of(context, listen: false).groups.remove(_group);
     await ChatListProvider.of(context, listen: false)
         .delete(_group.groupId, real: true);
-    Navigator.pop(context, true);
-    Routers.navigateTo(context, Routers.homeContacts,
+    Routers.navigateTo(context, Routers.homeChats,
         transition: TransitionType.fadeIn, clearStack: true);
     Toast.showToast(context, message: "解散成功");
   }
@@ -328,12 +332,10 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     var rsp =
         await toSignOutGroup(groupId: _group.groupId, friendId: _self.friendId);
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
-    await ChatListProvider.of(context, listen: false)
-        .delete(_group.groupId, real: true);
     GroupListProvider.of(context, listen: false).groups.remove(_group);
     await ChatListProvider.of(context, listen: false)
         .delete(_group.groupId, real: true);
-    Routers.navigateTo(context, Routers.homeContacts,
+    Routers.navigateTo(context, Routers.homeChats,
         transition: TransitionType.fadeIn, clearStack: true);
     Toast.showToast(context, message: "退出成功");
   }
@@ -347,7 +349,14 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
 
     if (rst is! String || rst.isEmpty) return;
     if (rst == _self.name) return;
-    Toast.showToast(context, message: "还没有接口实现更改群名称");
+
+    var rsp = await toUpdateGroup(name: rst, groupId: _group.groupId);
+    if (!rsp.success) return Toast.showToast(context, message: rsp.message);
+    _group.name = _chat.group.name = rst;
+    _group.serialize(forceUpdate: true);
+    _chat.forceUpdate();
+//    ChatListProvider.of(context, listen: false).forceUpdate();
+    if (mounted) setState(() {});
   }
 
   _editGroupAnnouncement(BuildContext context) async {
@@ -362,11 +371,11 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     if (rst is! String || rst.isEmpty) return;
     if (rst == _self.name) return;
 
-    var rsp = await toSetGroupAnnouncement(
-        announcement: rst, groupId: _group.groupId);
+    var rsp = await toUpdateGroup(announcement: rst, groupId: _group.groupId);
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
-    _group.announcement = rst;
-    _group.serialize();
+    _group.announcement = _chat.group.announcement = rst;
+    _group.serialize(forceUpdate: true);
+    _chat.forceUpdate();
     if (mounted) setState(() {});
   }
 
@@ -390,7 +399,6 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
   }
 
   _setGroupAdmin(BuildContext context) {
-    if (!isAdmin) return Toast.showToast(context, message: "只有群主及管理员可以设置管理员");
     Routers.navigateTo(
         context, Routers.groupSetAdmin + "?groupId=${_group.groupId}");
   }

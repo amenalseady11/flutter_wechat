@@ -1,31 +1,20 @@
 import 'dart:io';
 
-import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/pages/chat/chats.dart';
 import 'package:flutter_wechat/pages/contact/contacts.dart';
 import 'package:flutter_wechat/pages/discover/discover.dart';
 import 'package:flutter_wechat/pages/mine/mine.dart';
 import 'package:flutter_wechat/pages/mine/qr_code_scan.dart';
-import 'package:flutter_wechat/providers/chat/chat.dart';
-import 'package:flutter_wechat/providers/chat/chat_list.dart';
-import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
-import 'package:flutter_wechat/providers/contact/contact.dart';
-import 'package:flutter_wechat/providers/contact/contact_list.dart';
-import 'package:flutter_wechat/providers/group/group.dart';
-import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/home/home.dart';
-import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:flutter_wechat/routers/routers.dart';
+import 'package:flutter_wechat/service/sync_service.dart';
 import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
-import 'package:flutter_wechat/util/dialog/dialog.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/widgets/menu/menu.dart';
 import 'package:flutter_wechat/widgets/rotation/rotation.dart';
-import 'package:provider/provider.dart';
 
 class _HomeSubPage {
   const _HomeSubPage({
@@ -57,108 +46,14 @@ class _HomePageState extends State<HomePage> {
 
   bool _loading = true;
 
-  _remoteUpdate() async {
-    var updates = await Future.wait([
-      Provider.of<ContactListProvider>(context, listen: false)
-          .remoteUpdate(context),
-      Provider.of<GroupListProvider>(context, listen: false)
-          .remoteUpdate(context),
-    ]);
-    if (updates.contains(false) &&
-        await confirm(context, content: "网络连接失败，是否重试?", okText: "重试")) {
-      this._remoteUpdate();
-    }
-  }
-
-  void _initData() async {
+  _initData() async {
     if (socket.started) {
       _loading = false;
       return;
     }
 
     await Future.microtask(() {});
-
-    /// TODO: 开发模式调试，清空数据库
-    if (global.isDevelopment) {
-      var database = await SqfliteProvider().connect();
-      await Future.wait([
-        database.delete(ChatProvider.tableName),
-        database.delete(ChatMessageProvider.tableName),
-        database.delete(ContactProvider.tableName),
-        database.delete(GroupProvider.tableName),
-      ]);
-    }
-
-    await Future.wait([
-      Provider.of<GroupListProvider>(context, listen: false).deserialize(),
-      Provider.of<ContactListProvider>(context, listen: false).deserialize(),
-    ]);
-
-    await this._remoteUpdate();
-
-    await Provider.of<ChatListProvider>(context, listen: false).deserialize();
-
-    var chats = Provider.of<ChatListProvider>(context, listen: false).map;
-    var contacts =
-        Provider.of<ContactListProvider>(context, listen: false).contacts;
-    var groups = Provider.of<GroupListProvider>(context, listen: false).groups;
-
-    for (ContactProvider contact in contacts) {
-      ChatProvider chat = chats[contact.friendId];
-      if (chat != null) {
-        chat.contact = contact;
-        continue;
-      }
-      chat = ChatProvider(
-        profileId: global.profile.profileId,
-        sourceType: ChatSourceType.contact,
-        sourceId: contact.friendId,
-        latestUpdateTime: DateTime(2020, 2, 1),
-        visible: false,
-      )..contact = contact;
-      await chat.serialize(forceUpdate: true);
-      Provider.of<ChatListProvider>(context, listen: false).chats.add(chat);
-    }
-
-    Map<String, List<GroupProvider>> maps = {};
-    for (GroupProvider group in groups) {
-      ChatProvider chat = chats[group.groupId];
-      if (chat != null) {
-        chat.group = group;
-        continue;
-      }
-      chat = ChatProvider(
-        profileId: global.profile.profileId,
-        sourceType: ChatSourceType.group,
-        sourceId: group.groupId,
-        latestUpdateTime: DateTime(2020, 2, 1),
-        visible: false,
-      )..group = group;
-      await chat.serialize(forceUpdate: true);
-      Provider.of<ChatListProvider>(context, listen: false).chats.add(chat);
-
-      if (!maps.containsKey(group.groupId))
-        maps.putIfAbsent(group.groupId, () => []);
-      maps[group.groupId].add(group);
-    }
-    var clp = Provider.of<ChatListProvider>(context, listen: false);
-    LogUtil.v("话题列表：${clp.chats.length}", tag: "### HomePage ###");
-    if (clp.chats.length > 0) clp.forceUpdate();
-
-    socket.start();
-    socket.create(
-        private: true,
-        sourceId: global.profile.profileId,
-        getOffset: () => global.profile.offset);
-
-    chats = Provider.of<ChatListProvider>(context, listen: false).map;
-    for (GroupProvider group in groups) {
-      var chat = chats[group.groupId];
-      socket.create(
-          private: false,
-          sourceId: chat.sourceId,
-          getOffset: () => chat.offset);
-    }
+    await SyncService.toSyncData(context);
 
     _loading = false;
     if (mounted) setState(() {});

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
-import 'package:flutter_wechat/widgets/mh_text_field/mh_text_field.dart';
 
 ///
 class GroupSetNamePage extends StatefulWidget {
@@ -67,10 +66,10 @@ class _GroupSetNamePageState extends State<GroupSetNamePage> {
               margin: EdgeInsets.symmetric(vertical: ew(20)),
               padding:
                   EdgeInsets.symmetric(horizontal: ew(20), vertical: ew(10)),
-              child: MHTextField(
-                hintText: "新的群聊名称",
+              child: TextField(
+                decoration: InputDecoration(border: InputBorder.none),
                 controller: _name,
-                clearButtonMode: MHTextFieldWidgetMode.whileEditing,
+                maxLength: 10,
                 onChanged: (value) {
                   if (mounted) setState(() {});
                 },

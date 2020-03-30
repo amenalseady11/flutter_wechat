@@ -10,12 +10,14 @@ Future<DioResponse> toAddGroup(
   }).then((res) => res.data);
 }
 
-/// 3.2 更新群公告
-Future<DioResponse> toSetGroupAnnouncement(
-    {@required String groupId, @required String announcement}) {
-  return dio.put("/group/global/notice", data: {
+/// 3.2 更新群公告与群名称
+Future<DioResponse> toUpdateGroup(
+    {@required String groupId, String name, String announcement}) {
+  assert((name ?? announcement) != null);
+  return dio.put("/group", data: {
     "ID": groupId,
-    "GroupAnnouncement": announcement ?? ""
+    "GroupName": name,
+    "GroupAnnouncement": announcement
   }).then((res) => res.data);
 }
 
@@ -26,10 +28,10 @@ Future<DioResponse> toGetGroup({@required String groupId}) {
 
 /// 3.4 邀请新成员加入
 Future<DioResponse> toInviteJoinGroup(
-    {@required String groupId, @required String friendId}) {
+    {@required String groupId, @required List<String> friendIds}) {
   return dio.post("/group-member/join", data: {
     "GroupID": groupId,
-    "UserID": friendId,
+    "UserID": friendIds.join(","),
   }).then((res) => res.data);
 }
 

@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/providers/profile/profile.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:flutter_wechat/widgets/action_sheet/action_sheet.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:common_utils/common_utils.dart';
-import 'package:image_cropper/image_cropper.dart';
 
 class AvatarPage extends StatefulWidget {
   @override

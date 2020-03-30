@@ -6,6 +6,8 @@ import 'package:flutter_wechat/pages/chat/widgets/bottom_bar.dart';
 import 'package:flutter_wechat/pages/chat/widgets/message.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
+import 'package:flutter_wechat/providers/contact/contact.dart';
+import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
@@ -87,18 +89,60 @@ class ChatPageState extends State<ChatPage> {
                 return chat.messages.length;
               },
               builder: (context, length, child) {
-                LogUtil.v("消息总条数：" + length.toString(), tag: "###ChagePage###");
                 return _buildChild(context, length);
               },
             ),
           ),
-          ChatBottomBar()
+          Selector2<GroupProvider, ContactProvider, String>(
+            selector: (context, group, contact) {
+              if (group?.status == GroupStatus.dismiss)
+                return "群组已解散";
+              else if (group?.status == GroupStatus.exited)
+                return "你已踢出群组";
+              else if (group?.forbidden == GroupForbiddenStatus.forbidden)
+                return "全体禁言";
+//              else if (group?.self?.forbidden == GroupForbiddenStatus.forbidden)
+//                return "你已被禁言";
+
+              if (contact?.status == ContactStatus.notFriend)
+                return "对方不是你好友";
+              else if (contact?.black == ContactBlackStatus.black)
+                return "黑名单";
+              else if (contact?.black == ContactBlackStatus.eachBlack)
+                return "黑名单";
+
+              return null;
+            },
+            builder: (context, text, child) {
+              if (text == null) return ChatBottomBar();
+              return Stack(children: <Widget>[
+                ChatBottomBar(),
+                Opacity(
+                  opacity: 0.5,
+                  child: Container(
+                    color: Colors.grey,
+                    width: double.maxFinite,
+                    height: ew(110),
+//                    decoration: BoxDecoration(),
+                  ),
+                ),
+                Container(
+                    height: ew(110),
+                    child: Center(
+                        child: Text(text,
+                            style: TextStyle(
+                                fontSize: ew(32), color: Style.sTextColor)))),
+              ]);
+            },
+          )
         ],
       ),
     );
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: widget.chat),
+        ChangeNotifierProvider.value(value: widget.chat.group),
+        ChangeNotifierProvider.value(value: widget.chat.contact),
         Provider.value(value: audio),
         Provider.value(value: this),
       ],
@@ -131,7 +175,6 @@ class ChatPageState extends State<ChatPage> {
           );
         },
         separatorBuilder: (BuildContext context, int index) {
-          if (index <= 0) return Container();
           var current = widget.chat.messages[index + 1].sendTime;
           var next = widget.chat.messages.length > index + 2
               ? widget.chat.messages[index + 2].sendTime
@@ -207,7 +250,7 @@ class ChatPageState extends State<ChatPage> {
             offset: 0);
       }
 
-      LogUtil.v("长度:${list.length}", tag: "### ChatPage ###");
+      LogUtil.v("本次加载条数:${list.length}", tag: "### ChatPage ###");
       for (var json in list) {
         var message = ChatMessageProvider.fromJson(json);
         chat.messages.insert(0, message);

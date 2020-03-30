@@ -20,6 +20,7 @@ class GroupAvatar extends StatelessWidget {
     double padding = ew(2);
     double margin = ew(2);
     var childCount = avatars.length;
+    if (childCount > 9) childCount = 9;
     var columnMax;
     List<Widget> icons = [];
     List<Widget> stacks = [];
@@ -80,6 +81,13 @@ class GroupAvatar extends StatelessWidget {
 }
 
 _weChatGroupChatChildIcon(String avatar, double width) {
+  if (avatar == null || avatar.isEmpty)
+    return Container(
+        decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.all(Radius.circular(ew(4)))),
+        height: width,
+        width: width);
   return Container(
     decoration:
         BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(ew(4)))),

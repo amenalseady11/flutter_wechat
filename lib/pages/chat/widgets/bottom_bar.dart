@@ -10,7 +10,9 @@ import 'package:flutter_wechat/pages/chat/widgets/voice_button.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
+import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
+import 'package:flutter_wechat/util/dio/dio.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -180,7 +182,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
       fromFriendId: global.profile.friendId,
       fromNickname: global.profile.name,
       fromAvatar: global.profile.avatar,
-      status: ChatMessageStatusEnum.sending,
+      status: ChatMessageStatus.sending,
     );
 
     if (chat.isContactChat) {
@@ -213,9 +215,9 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         sourceId: message.sourceId,
         type: message.type,
         body: message.body);
+    await _toSendMsgRsp(rsp);
     if (!rsp.success) {
-      Toast.showToast(context, message: rsp.message);
-      message.status = ChatMessageStatusEnum.sendError;
+      message.status = ChatMessageStatus.sendError;
       message.serialize(forceUpdate: true);
       if (mounted) setState(() {});
       return;
@@ -223,7 +225,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
 
     if (rsp.body != null && rsp.body is String && rsp.body.isNotEmpty)
       message.sendId = rsp.body as String;
-    message.status = ChatMessageStatusEnum.complete;
+    message.status = ChatMessageStatus.complete;
     message.serialize(forceUpdate: true);
     if (mounted) setState(() {});
   }
@@ -253,7 +255,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         contentType: MediaType("audio", "wav"), suffix: "wav");
     if (!rsp.success) {
       Toast.showToast(context, message: rsp.message);
-      message.status = ChatMessageStatusEnum.sendError;
+      message.status = ChatMessageStatus.sendError;
       message.serialize(forceUpdate: true);
       if (mounted) setState(() {});
       return;
@@ -268,9 +270,9 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         sourceId: message.sourceId,
         type: message.type,
         body: message.body);
+    await _toSendMsgRsp(rsp);
     if (!rsp.success) {
-      Toast.showToast(context, message: rsp.message);
-      message.status = ChatMessageStatusEnum.sendError;
+      message.status = ChatMessageStatus.sendError;
       message.serialize(forceUpdate: true);
       if (mounted) setState(() {});
       return;
@@ -278,7 +280,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
 
     if (rsp.body != null && rsp.body is String && rsp.body.isNotEmpty)
       message.sendId = rsp.body as String;
-    message.status = ChatMessageStatusEnum.complete;
+    message.status = ChatMessageStatus.complete;
     message.serialize(forceUpdate: true);
     if (mounted) setState(() {});
   }
@@ -309,7 +311,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         contentType: MediaType("image", "png"), suffix: "png");
     if (!rsp.success) {
       Toast.showToast(context, message: rsp.message);
-      message.status = ChatMessageStatusEnum.sendError;
+      message.status = ChatMessageStatus.sendError;
       message.serialize(forceUpdate: true);
       if (mounted) setState(() {});
       return;
@@ -324,9 +326,9 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         sourceId: message.sourceId,
         type: message.type,
         body: message.body);
+    await _toSendMsgRsp(rsp);
     if (!rsp.success) {
-      Toast.showToast(context, message: rsp.message);
-      message.status = ChatMessageStatusEnum.sendError;
+      message.status = ChatMessageStatus.sendError;
       message.serialize(forceUpdate: true);
       if (mounted) setState(() {});
       return;
@@ -334,8 +336,19 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
 
     if (rsp.body != null && rsp.body is String && rsp.body.isNotEmpty)
       message.sendId = rsp.body as String;
-    message.status = ChatMessageStatusEnum.complete;
+    message.status = ChatMessageStatus.complete;
     message.serialize(forceUpdate: true);
     if (mounted) setState(() {});
+  }
+
+  _toSendMsgRsp(DioResponse rsp) async {
+    if (rsp.success) return;
+    var contact = ContactProvider.of(context, listen: false);
+    if (contact != null && rsp.message == "您还不是对方的好友") {
+      contact.status = ContactStatus.notFriend;
+      await contact.serialize(forceUpdate: true);
+      return;
+    }
+    Toast.showToast(context, message: rsp.message);
   }
 }

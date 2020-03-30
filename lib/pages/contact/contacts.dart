@@ -65,34 +65,48 @@ class _ContactsPageState extends State<ContactsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ContactListProvider>(
-        builder: (BuildContext context, clp, Widget child) {
-      return SmartRefresher(
-        controller: _refreshController,
-        onRefresh: _onRefresh,
-        header: WaterDropHeader(waterDropColor: Style.pTintColor),
-        child: AzListView(
-          header: _buildAzListViewHeader(context),
-          data: clp.contacts,
-          itemBuilder: (context, model) {
-            return ContactItemWidget(
-              contact: model,
-              susWidget: _buildSusWidget(model.getSuspensionTag()),
-              itemHeight: _itemHeight,
-            );
-          },
-          suspensionWidget: _buildSusWidget(_suspensionTag),
-          isUseRealIndex: false,
-          itemHeight: _itemHeight.toInt(),
-          suspensionHeight: _suspensionHeight,
-          onSusTagChanged: (tag) {
-            setState(() {
-              _suspensionTag = tag;
-            });
-          },
-        ),
-      );
-    });
+    return SmartRefresher(
+      controller: _refreshController,
+      onRefresh: _onRefresh,
+      header: WaterDropHeader(waterDropColor: Style.pTintColor),
+      child: Selector<ContactListProvider, List<ContactProvider>>(
+        selector: (context, clp) {
+          var contacts = clp.contacts
+              .where((d) => d.status == ContactStatus.normal)
+              .toList()
+                ..sort((d1, d2) {
+                  var rst =
+                      d1.getSuspensionTag().compareTo(d2.getSuspensionTag());
+                  if (rst != 0) return rst;
+                  return d1.name.compareTo(d2.name);
+                });
+          SuspensionUtil.sortListBySuspensionTag(contacts);
+          return contacts;
+        },
+        builder: (context, contacts, child) {
+          return AzListView(
+            header: _buildAzListViewHeader(context),
+            data: contacts,
+            itemBuilder: (context, model) {
+              return ContactItemWidget(
+                contact: model,
+                susWidget: _buildSusWidget(model.getSuspensionTag()),
+                itemHeight: _itemHeight,
+              );
+            },
+            suspensionWidget: _buildSusWidget(_suspensionTag),
+            isUseRealIndex: false,
+            itemHeight: _itemHeight.toInt(),
+            suspensionHeight: _suspensionHeight,
+            onSusTagChanged: (tag) {
+              setState(() {
+                _suspensionTag = tag;
+              });
+            },
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildSusWidget(String susTag) {

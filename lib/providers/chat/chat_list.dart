@@ -22,7 +22,7 @@ class ChatListProvider extends ChangeNotifier {
   factory ChatListProvider() => _chatList;
   ChatListProvider._();
 
-  final List<ChatProvider> chats = [];
+  List<ChatProvider> chats = [];
 
   Map<String, ChatProvider> get map =>
       chats.fold({}, (m, d) => m..putIfAbsent(d.sourceId, () => d));
@@ -94,6 +94,7 @@ class ChatListProvider extends ChangeNotifier {
         this.sort(forceUpdate: true);
         return rst;
       }
+      chats.remove(chat);
 
       socket.remove(private: false, sourceId: sourceId);
 
@@ -103,7 +104,7 @@ class ChatListProvider extends ChangeNotifier {
           whereArgs: [profileId, sourceId]);
 
       // 删除群组
-      database.delete(GroupProvider.tableName,
+      await database.delete(GroupProvider.tableName,
           where: "profileId = ? and groupId = ?",
           whereArgs: [profileId, sourceId]);
 
@@ -117,11 +118,11 @@ class ChatListProvider extends ChangeNotifier {
   }
 
   sort({bool forceUpdate = false}) {
-    chats.sort((d1, d2) {
-      var rst = d2.sortTime.compareTo(d1.sortTime);
-      if (rst != 0) return rst;
-      return d2.serializeId.compareTo(d1.serializeId);
-    });
+//    chats.sort((d1, d2) {
+//      var rst = d2.sortTime.compareTo(d1.sortTime);
+//      if (rst != 0) return rst;
+//      return d2.serializeId.compareTo(d1.serializeId);
+//    });
     if (forceUpdate) notifyListeners();
   }
 
@@ -163,8 +164,6 @@ class ChatListProvider extends ChangeNotifier {
         getChat(sourceType: sourceType, sourceId: sourceId, created: true);
     if (chat.serializeId != null) return chat;
 
-    // 因为私聊是一个连接，可能出现没有本地没有联系人情况，确收到消息
-    // 只有私聊才有这种情况
     if (sourceType == ChatSourceType.contact) {
       var rsp = await toGetUserBriefly(friendId: sourceId);
       if (!rsp.success) return chat;
@@ -176,7 +175,6 @@ class ChatListProvider extends ChangeNotifier {
       contact.mobile = rsp.body["MobileNumber"] as String ?? "";
       chat.contact = contact;
     }
-
     return chat;
   }
 }

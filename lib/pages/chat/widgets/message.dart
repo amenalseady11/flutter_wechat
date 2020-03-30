@@ -21,7 +21,15 @@ class ChatMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (message.type == MessageType.addFriend) {
-      return _buildAddFriendMsg(context);
+      return _buildTipMsg(context);
+    }
+
+    if (message.type == MessageType.addGroup) {
+      return _buildTipMsg(context);
+    }
+
+    if (message.type == MessageType.expelGroup) {
+      return _buildTipMsg(context);
     }
 
     List<Widget> children = [];
@@ -83,7 +91,7 @@ class ChatMessage extends StatelessWidget {
     return [_buildAvatar(context), _buildMsg(context)];
   }
 
-  Widget _buildAddFriendMsg(BuildContext context) {
+  Widget _buildTipMsg(BuildContext context) {
     return Container(
         padding: EdgeInsets.symmetric(vertical: ew(10)),
         child: Text(message.body.toString(),
@@ -113,7 +121,7 @@ class ChatMessage extends StatelessWidget {
     if (!message.isSelf) return child;
 
     // 请求/发送中
-    if (message.status == ChatMessageStatusEnum.sending) {
+    if (message.status == ChatMessageStatus.sending) {
       return Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
         Rotation(
           child: Container(
@@ -127,7 +135,7 @@ class ChatMessage extends StatelessWidget {
     }
 
     // 请求/发送错误
-    if (message.status == ChatMessageStatusEnum.sendError) {
+    if (message.status == ChatMessageStatus.sendError) {
       return Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
         Container(
             padding: EdgeInsets.all(ew(10)),

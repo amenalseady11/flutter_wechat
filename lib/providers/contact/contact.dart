@@ -4,8 +4,60 @@ import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:azlistview/azlistview.dart';
+import 'package:provider/provider.dart';
+
+/// 联系人状态
+abstract class ContactStatus {
+  /// 正常（朋友状态）
+  static const int normal = 0;
+
+  /// 不是朋友（查询朋友数据不正常）
+  static const int notFriend = 1;
+
+  /// 已被删除
+  static const int deleted = 2;
+}
+
+/// 黑名单状态
+///  0 互相拉黑  1:被拉黑  2：拉黑好友   3：关系正常
+abstract class ContactBlackStatus {
+  ///  0 互相拉黑
+  static const int eachBlack = 0;
+
+  ///  1:被拉黑
+  static const int coverBlack = 1;
+
+  /// 2：拉黑好友
+  static const int black = 2;
+
+  /// 3：关系正常
+  static const int normal = 3;
+
+  /// 解析字符串黑名单
+  /// TODO:后端接口返回不一致
+  static int parse(dynamic black) {
+    if (black is int) return black;
+    if (black is! String) return normal;
+
+    ///  IS_BLACK_EACH_OTHER string = "00" // 互相拉黑
+    if ("00" == black) return eachBlack;
+
+    ///  IS_BLACK_U_PULL_F string = "01"  // u 拉黑 f
+    if ("01" == black) return black;
+
+    /// IS_BLACK_F_PULL_U string = "10"  // f 拉黑 u
+    if ("10" == black) return coverBlack;
+
+    ///    IS_NOT_BLACK string = "11"  // 正常
+    return normal;
+  }
+}
 
 class ContactProvider extends ChangeNotifier implements ISuspensionBean {
+  static ContactProvider of(BuildContext context, {bool listen = true}) {
+    return Provider.of<ContactProvider>(context, listen: listen);
+  }
+
   static const String tableName = "t_contact";
   String profileId;
   int serializeId;
@@ -16,8 +68,11 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
   String avatar;
   String initials;
 
-  ///  0 互相拉黑  1:被拉黑  2：拉黑好友   3：关系正常
-  int black;
+  /// [ContactBlackStatus] 0 互相拉黑  1:被拉黑  2：拉黑好友   3：关系正常
+  int black = ContactBlackStatus.normal;
+
+  /// [ContactStatus]
+  int status = ContactStatus.normal;
 
   bool isShowSuspension = false;
   getSuspensionTag() => initials ?? "#";
@@ -44,6 +99,7 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
     String avatar,
     String initials,
     int black,
+    int status,
   }) {
     if (enableNull || serializeId != null) this.serializeId = serializeId;
     if (enableNull || profileId != null) this.profileId = profileId;
@@ -79,7 +135,8 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
         avatar: json["avatar"] as String,
         remark: json["remark"] as String,
         initials: json["initials"] as String,
-        black: json["black"] as int,
+        black: json["black"] as int ?? ContactBlackStatus.normal,
+        status: json["status"] as int ?? ContactStatus.normal,
         enableUpdate: enableUpdate,
         enableNull: enableNull,
         forceUpdate: forceUpdate,
@@ -100,11 +157,12 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
       "avatar": avatar,
       "remark": remark,
       "initials": initials,
-      "black": black,
+      "black": black ?? ContactBlackStatus.normal,
+      "status": status ?? ContactStatus.normal,
     };
   }
 
-  Future<bool> serialize() async {
+  Future<bool> serialize({bool forceUpdate: false}) async {
     try {
       var database = await SqfliteProvider().connect();
 
@@ -113,17 +171,20 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
 
         var rst = this.serializeId =
             await database.insert(ContactProvider.tableName, this.toJson());
-        LogUtil.v("插入联系人信息:$rst");
+        LogUtil.v("插入联系人信息:$friendId,$rst", tag: "### ContactProvider ###");
         return rst > 0;
       }
 
       var rst = await database.update(ContactProvider.tableName, this.toJson(),
           where: "serializeId = ?", whereArgs: [this.serializeId]);
-      LogUtil.v("更新联系人信息:$rst");
+      LogUtil.v("更新联系人信息:$friendId,共$rst条", tag: "### ContactProvider ###");
       return rst > 0;
     } catch (e) {
-      LogUtil.e(e, tag: "联系人序列化:$friendId");
+      LogUtil.e("同步联系人异常:$friendId", tag: "### ContactProvider ###");
+      LogUtil.e(e, tag: "### ContactProvider ###");
       return false;
+    } finally {
+      if (forceUpdate) notifyListeners();
     }
   }
 

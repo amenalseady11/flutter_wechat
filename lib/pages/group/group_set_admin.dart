@@ -24,9 +24,9 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
 
   TextEditingController _search = TextEditingController();
 
-  Map<String, List<GroupMemberProvider>> _map = {};
-
   List<GroupMemberProvider> _members;
+
+  GroupMemberProvider _self;
 
   List<String> _selects = [];
 
@@ -36,13 +36,14 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
     var glpm = GroupListProvider.of(context, listen: false).map;
     this._group = glpm[widget.groupId] ?? GroupProvider();
     this._members = List.from(_group.members);
+    this._self = this._members.firstWhere(
+        (d) => d.friendId == global.profile.friendId,
+        orElse: () => GroupMemberProvider());
   }
 
   get members {
-    if (_map.containsKey(_search.text)) return _map[_search.text];
-    if (_search.text.isEmpty) return _members;
+    _members..sort((d1, d2) => d2.roleSort.compareTo(d1.roleSort));
     var members = _members.where((d) => d.name.contains(_search.text)).toList();
-    _map.putIfAbsent(_search.text, () => members);
     return members;
   }
 
@@ -144,12 +145,12 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
           trailing: getTrailing(context, member) ??
               Container(
                 padding: EdgeInsets.symmetric(vertical: ew(24)),
-                width: ew(140),
+                constraints: BoxConstraints(minWidth: ew(140)),
                 child: RaisedButton(
-                  color: member.isAdmin ? Colors.redAccent : Style.pTintColor,
+                  color: !member.isAdmin ? Colors.redAccent : Style.pTintColor,
                   textColor: Colors.white,
                   elevation: 0.0,
-                  child: !member.isAdmin ? Text("设置") : Text("取消"),
+                  child: member.isAdmin ? Text("管理员") : Text("成员"),
                   onPressed: () => _setAdmin(context, member),
                 ),
               ),
@@ -161,16 +162,19 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
 
   getTrailing(BuildContext context, GroupMemberProvider member) {
     List<String> rst = [];
-    if (member.friendId == global.profile.friendId) {
-      rst.add("本人");
-    }
-    if (member.friendId == _group.createId) {
+
+    if (member.isMaster) {
       rst.add("群主");
+    } else if (!_self.isAdmin) {
+      rst.add(member.isAdmin ? '管理员' : '成员');
+    } else if (_self.isAdmin && !_self.isMaster) {
+      rst.add("管理员");
     }
+
     if (rst.isNotEmpty)
       return Container(
           padding: EdgeInsets.symmetric(vertical: ew(24)),
-          width: ew(140),
+          constraints: BoxConstraints(minWidth: ew(140)),
           child: RaisedButton(
             disabledTextColor: Colors.white70,
             disabledElevation: 0,

@@ -43,6 +43,15 @@ class CAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (avatar == null || avatar.isEmpty)
+      return Container(
+        decoration: BoxDecoration(
+          color: color ?? Style.pBackgroundColor,
+          borderRadius: BorderRadius.all(Radius.circular(ew(6))),
+        ),
+        width: size,
+        height: size,
+      );
     Widget child = CachedNetworkImage(
       imageUrl: avatar,
       width: size,

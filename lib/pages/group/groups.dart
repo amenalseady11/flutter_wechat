@@ -22,9 +22,11 @@ class _GroupsPageState extends State<GroupsPage> {
   @override
   void initState() {
     super.initState();
-    if (GroupListProvider.of(context, listen: false).groups.isEmpty) {
-      _refreshController.requestRefresh();
-    }
+    Future.microtask(() {
+      if (GroupListProvider.of(context, listen: false).groups.isEmpty) {
+        _refreshController.requestRefresh();
+      }
+    });
   }
 
   _onRefresh() async {
@@ -48,13 +50,17 @@ class _GroupsPageState extends State<GroupsPage> {
         Provider.of<ChatListProvider>(context, listen: false).chats.add(chat);
       }
       chat.group = group;
+      if (group.status != GroupStatus.joined) continue;
       socket.create(
-          private: false, sourceId: group.groupId, getOffset: () => chat.group);
+          private: false,
+          sourceId: group.groupId,
+          getOffset: () => chat.offset);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    var prevStr = "";
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ew(80)),
@@ -74,19 +80,36 @@ class _GroupsPageState extends State<GroupsPage> {
           ],
         ),
       ),
-      body: Consumer<GroupListProvider>(
-        builder: (BuildContext context, GroupListProvider glp, Widget child) {
-          return SmartRefresher(
-            controller: _refreshController,
-            onRefresh: _onRefresh,
-            header: WaterDropHeader(waterDropColor: Style.pTintColor),
-            child: ListView.builder(
+      body: SmartRefresher(
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        header: WaterDropHeader(waterDropColor: Style.pTintColor),
+        child: Selector<GroupListProvider, List<GroupProvider>>(
+          selector: (context, glp) {
+            return glp.groups
+                .where((d) => d.status == GroupStatus.joined)
+                .toList();
+          },
+          shouldRebuild: (prev, next) {
+            var str1 = prevStr;
+            var str2 = prevStr =
+                next.fold('', (m, d) => m + "|${d.name}:${d.members.length}");
+            return str1 != str2;
+          },
+          builder: (context, groups, child) {
+            return ListView.builder(
                 shrinkWrap: true,
-                itemCount: glp.groups.length,
-                itemBuilder: (context, index) =>
-                    _buildItemChild(context, glp.groups[index])),
-          );
-        },
+                itemCount: groups.length,
+                itemBuilder: (context, index) {
+                  return ChangeNotifierProvider.value(
+                      value: groups[index],
+                      child: Consumer<GroupProvider>(
+                          builder: (context, group, child) {
+                        return _buildItemChild(context, group);
+                      }));
+                });
+          },
+        ),
       ),
     );
   }
@@ -98,12 +121,21 @@ class _GroupsPageState extends State<GroupsPage> {
           contentPadding:
               EdgeInsets.symmetric(vertical: ew(16), horizontal: ew(30)),
           leading: GroupAvatar(avatars: group.avatars),
-          title: Text(group.name + "(${group.members.length})"),
+          title: Text(group.name + "(${group.members.length})",
+              maxLines: 1, overflow: TextOverflow.ellipsis),
           trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
               width: ew(16), height: ew(26)),
-          onTap: () {
-            Routers.navigateTo(context,
+          onTap: () async {
+            var rst = await Routers.navigateTo(context,
                 Routers.chat + "?sourceType=1&sourceId=${group.groupId}");
+
+            if (rst == 'delete') {
+              GroupListProvider.of(context, listen: false).groups.remove(group);
+              ChatListProvider.of(context, listen: false)
+                  .delete(group.groupId, real: true);
+              if (mounted) setState(() {});
+              _refreshController.requestRefresh();
+            }
           },
         ),
         Divider(height: ew(1), color: Style.pDividerColor),

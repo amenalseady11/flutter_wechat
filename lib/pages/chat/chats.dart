@@ -21,7 +21,11 @@ class ChatsPage extends StatelessWidget {
           if (d.contact != null) return true;
           if (d.group != null) return true;
           return false;
-        }).toList(growable: false);
+        }).toList(growable: false)
+          ..sort((d1, d2) {
+            return d2.sortTime.compareTo(d1.sortTime);
+          });
+        ;
       },
       builder: (BuildContext context, List<ChatProvider> chats, Widget child) {
         return ListView.builder(
@@ -111,6 +115,8 @@ class ChatsPage extends StatelessWidget {
   _buildTitle(BuildContext context, ChatProvider chat) {
     var text = chat.isContactChat ? chat.contact.name : chat.group?.name;
     return Text(text ?? "",
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(fontSize: sp(32), color: Style.pTextColor));
   }
 

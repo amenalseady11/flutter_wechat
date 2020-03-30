@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
+import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
@@ -57,9 +58,15 @@ class ContactPage extends StatefulWidget {
     if (json == null) {
       if (clpm.containsKey(friendId)) {
         var contact = clpm[friendId];
-        json = contact.toJson();
-        json.putIfAbsent("_relation", () => _ContactRelation.friend);
-        json.putIfAbsent("_isFriend", () => true);
+        if (contact.status == ContactStatus.normal) {
+          json = contact.toJson();
+          json.putIfAbsent(
+              "_relation",
+              () => contact.status == ContactStatus.normal
+                  ? _ContactRelation.friend
+                  : _ContactRelation.stranger);
+          json.putIfAbsent("_isFriend", () => true);
+        }
       }
     }
 
@@ -83,23 +90,6 @@ class ContactPage extends StatefulWidget {
       json.putIfAbsent("_isFriend", () => false);
       json.putIfAbsent("_relation", () => _ContactRelation.unknown);
     }
-
-    String str;
-    str = json['remark'] as String;
-    json.putIfAbsent("_remark", () => str != null && str.isNotEmpty);
-
-    str = json['nickname'] as String;
-    json.putIfAbsent("_nickname", () => str != null && str.isNotEmpty);
-
-    str = json['mobile'] as String;
-    json.putIfAbsent("_mobile", () => str != null && str.isNotEmpty);
-
-    json.putIfAbsent("_name", () {
-      if (json["_remark"] == true) return json["remark"];
-      if (json["_nickname"] == true) return json["nickname"];
-      if (json["_mobile"] == true) return json["mobile"];
-      return "";
-    });
 
 //    LogUtil.v("${jsonEncode(json)}");
 
@@ -191,9 +181,8 @@ class _ContactPageState extends State<ContactPage> {
                   SizedBox(height: ew(20)),
                   Text(
                     (widget.data.relation == _ContactRelation.groupMember
-                            ? '群'
-                            : '') +
-                        "昵称：${widget.data.nickname}",
+                        ? '群昵称：${widget.data.name}'
+                        : '昵称：${widget.data.name}'),
                     style: TextStyle(color: Style.sTextColor, fontSize: sp(26)),
                   ),
                   SizedBox(height: ew(8)),
@@ -316,7 +305,7 @@ class _ContactPageState extends State<ContactPage> {
         var rst = await Routers.navigateTo(
             context,
             Routers.groupMemberSetNickname +
-                "?nickname=${Uri.encodeComponent(widget.data.nickname)}");
+                "?nickname=${Uri.encodeComponent(widget.data.name)}");
 
         if (rst is! String || rst.isEmpty) return;
         if (rst == widget.data.nickname) return;
@@ -330,7 +319,8 @@ class _ContactPageState extends State<ContactPage> {
         var group = glp.map[widget.data.groupId];
         var member =
             group.members.firstWhere((d) => d.friendId == widget.data.friendId);
-        widget.data.nickname = rst;
+        member.remark = rst;
+        widget.data.remark = rst;
         member.nickname = rst;
         group.serialize(forceUpdate: true);
         if (mounted) setState(() {});
@@ -451,7 +441,15 @@ class _ContactData {
 
   get isFriend => json["_isFriend"] == true;
 
-  get name => json["_name"] as String ?? "";
+  get name {
+    String txt;
+    txt = json['remark'] ?? "";
+    if (txt.isNotEmpty) return txt;
+    txt = json['nickname'] ?? "";
+    if (txt.isNotEmpty) return txt;
+    txt = json['mobile'] ?? "";
+    return mobile;
+  }
 
   get groupId => json['groupId'] as String;
 
@@ -462,6 +460,10 @@ class _ContactData {
   get nickname => json["nickname"] as String ?? "";
   set nickname(String nickname) {
     json['nickname'] = nickname;
+  }
+
+  set remark(String remark) {
+    json['remark'] = remark;
   }
 
   get mobile => json["mobile"] as String ?? "";

@@ -49,10 +49,11 @@ class ContactListProvider extends ChangeNotifier {
 
   Future<bool> delete(String profileId, String friendId) async {
     var database = await SqfliteProvider().connect();
-    var rst = await database.delete(ContactProvider.tableName,
+    var rst = await database.update(
+        ContactProvider.tableName, {"status": ContactStatus.deleted},
         where: "profileId = ? and friendId = ?",
         whereArgs: [profileId, friendId]);
-    LogUtil.v("删除联系人信息:$friendId,$rst");
+    LogUtil.v("伪删除联系人信息:$friendId,$rst", tag: "### ContactListProvider ###");
 
     ContactProvider contact = map[friendId];
     if (contact != null) {
@@ -77,7 +78,7 @@ class ContactListProvider extends ChangeNotifier {
   Future<bool> remoteUpdate(BuildContext context) async {
     var profileId = global.profile.profileId;
     if (profileId == null || profileId.isEmpty) {
-      LogUtil.v("远程获取联系人请登录");
+      LogUtil.v("远程获取联系人请登录", tag: "### ContactListProvider ###");
       return false;
     }
     var rsp = await toGetFriends();
@@ -87,7 +88,12 @@ class ContactListProvider extends ChangeNotifier {
     }
     var list = (rsp.body as Iterable) ?? [];
 
-    var updatedCount = 0;
+    // 添加/更新/删除
+    var counts = [0, 0, 0];
+
+    var friendIds = [];
+
+    var map = this.map;
 
     for (var json in list) {
       var contact = ContactProvider.fromJson({})
@@ -98,28 +104,39 @@ class ContactListProvider extends ChangeNotifier {
         ..avatar = json["Avatar"] ?? ""
         ..remark = json["Remark"] ?? ""
         ..initials = json["Initial"] ?? "#"
-        ..black = json["IsBlack"] ?? 3;
+        ..black = json["IsBlack"] ?? ContactBlackStatus.normal
+        ..status = ContactStatus.normal;
+
+      friendIds.add("'${contact.friendId}'");
 
       if (!map.containsKey(contact.friendId)) {
         _contacts.add(contact);
-        await contact.serialize();
-        updatedCount++;
+        if (!await contact.serialize()) continue;
+        counts[0] = counts[0] + 1;
+        map.putIfAbsent(contact.friendId, () => contact);
         continue;
       }
 
-      var prev = map[contact.friendId];
-      if (prev.equal(contact)) {
-        LogUtil.v("联系人 \"${contact.friendId}\" 缓存一致，不再更新。");
-        continue;
-      }
+      var old = map[contact.friendId];
+      if (old.equal(contact)) continue;
 
-      prev.updateJson(contact.toJson());
-      await prev.serialize();
-      updatedCount++;
+      old.updateJson(contact.toJson());
+      if (!await old.serialize(forceUpdate: true)) continue;
+      counts[1] = counts[1] + 1;
     }
 
-    LogUtil.v("联系人总插入/更新:$updatedCount条");
-    if (updatedCount > 0) this.forceUpdate();
+    var database = await SqfliteProvider().connect();
+    var where = "profileId = '$profileId' and status = ${ContactStatus.normal}";
+    if (friendIds.isNotEmpty)
+      where += " and friendId not in (${friendIds.join(",")})";
+    counts[2] = await database.update(
+        ContactProvider.tableName, {"status": ContactStatus.notFriend},
+        where: where);
+
+    LogUtil.v("联系人远程同步:插入${counts[0]}条；更新${counts[1]}条；伪删除${counts[2]}条。",
+        tag: "### ContactListProvider ###");
+
+    notifyListeners();
 
     return true;
   }

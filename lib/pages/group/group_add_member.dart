@@ -227,10 +227,21 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
       Routers.navigateTo(
           context, Routers.chat + "?sourceType=1&sourceId=${group.groupId}",
           replace: true);
+
+      Toast.showToast(context, message: "创建成功");
       return;
     }
 
-    // 添加成员
-    Toast.showToast(context, message: "批量添加成员未实现");
+    var rsp =
+        await toInviteJoinGroup(groupId: _group.groupId, friendIds: _selects);
+    if (!rsp.success) return Toast.showToast(context, message: rsp.message);
+    await _group.remoteUpdate(context);
+
+    /// 这个位置最好返回群组信息
+    /// 直接进入群聊聊天界面
+    Routers.navigateTo(
+        context, Routers.chat + "?sourceType=1&sourceId=${_group.groupId}",
+        replace: true);
+    Toast.showToast(context, message: "邀请成功");
   }
 }

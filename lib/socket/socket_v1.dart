@@ -156,13 +156,13 @@ class _HttpSocket {
 
         ChatMessageProvider message;
         if (contentType == MessageType.text)
-          message = ChatMessageProvider(status: ChatMessageStatusEnum.complete);
+          message = ChatMessageProvider(status: ChatMessageStatus.complete);
         else if (contentType == MessageType.urlImg)
-          message = ChatMessageProvider(status: ChatMessageStatusEnum.loading);
+          message = ChatMessageProvider(status: ChatMessageStatus.loading);
         else if (contentType == MessageType.urlVoice)
           message = ChatMessageProvider(
-              status: ChatMessageStatusEnum.loading,
-              state: ChatMessageStates.voiceUnRead);
+              status: ChatMessageStatus.loading,
+              readStatus: ChatMessageReadStatus.unRead);
         else {
           if (global.isDebug)
             LogUtil.v("收到消息:${private ? '私' : '群'}[$sourceId]$contentType-暂不支持",

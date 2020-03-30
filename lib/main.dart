@@ -39,6 +39,7 @@ main() async {
   shared.sharedPreferences = await SharedPreferences.getInstance();
   ProfileProvider().deserialize();
 
+  LogUtil.v("friendId: ${global.profile.friendId}", tag: "### main ###");
   LogUtil.v("token: ${global.profile.authToken}", tag: "### main ###");
 
   String version = global.pkg.version;

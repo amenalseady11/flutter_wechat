@@ -4,8 +4,7 @@ CREATE TABLE t_contact (
                         PRIMARY KEY AUTOINCREMENT
                         UNIQUE,
     profileId    TEXT    NOT NULL,
-    friendId    TEXT    NOT NULL
-                        UNIQUE,
+    friendId    TEXT    NOT NULL,
     mobile      TEXT    NOT NULL
                         UNIQUE,
     nickname    TEXT    NOT NULL,
@@ -13,24 +12,30 @@ CREATE TABLE t_contact (
     avatar      TEXT    NOT NULL,
     initials    TEXT    DEFAULT '#',
     black       INTEGER NOT NULL
-                        DEFAULT (3)
+                        DEFAULT (3),
+    status       INTEGER NOT NULL
+                        DEFAULT (0)
 );
-
+CREATE UNIQUE INDEX t_contact_unique ON t_contact(profileId, friendId);
 
 CREATE TABLE t_group (
     serializeId  INTEGER NOT NULL
                          PRIMARY KEY AUTOINCREMENT
                          UNIQUE,
     profileId    TEXT    NOT NULL,
-    groupId      TEXT    NOT NULL
-                         UNIQUE,
+    groupId      TEXT    NOT NULL,
     name         TEXT    NOT NULL,
     announcement TEXT    NOT NULL,
     createId     TEXT    NOT NULL,
-    status       INTEGER NOT NULL,
+    forbidden    INTEGER NOT NULL
+                        DEFAULT (1),
+    status       INTEGER NOT NULL
+                        DEFAULT (0),
+    instTime     INTEGER NOT NULL,
+    updtTime     INTEGER NOT NULL,
     members      TEXT    NOT NULL
 );
-
+CREATE UNIQUE INDEX t_group_unique ON t_group(profileId, groupId);
 
 
 CREATE TABLE t_chat(
@@ -40,8 +45,7 @@ CREATE TABLE t_chat(
     profileId    TEXT    NOT NULL,
     sourceType       INTEGER NOT NULL
                              DEFAULT (0),
-    sourceId         TEXT    NOT NULL
-                             UNIQUE,
+    sourceId         TEXT    NOT NULL,
     unread           INTEGER NOT NULL
                              DEFAULT (0),
     unreadTag        INTEGER NOT NULL
@@ -54,6 +58,7 @@ CREATE TABLE t_chat(
                              DEFAULT (0),
     latestUpdateTime INTEGER NOT NULL
 );
+CREATE UNIQUE INDEX t_chat_unique ON t_chat(profileId, sourceId);
 
 
 CREATE TABLE t_chat_message (
@@ -72,9 +77,6 @@ CREATE TABLE t_chat_message (
     sendId       TEXT    NOT NULL,
     sendTime     INTEGER NOT NULL,
     status       INTEGER NOT NULL,
-    state        INTEGER NOT NULL,
-    extra1       TEXT,
-    extra2       TEXT,
-    extra3       TEXT,
-    extra4       TEXT
+    readStatus   INTEGER NOT NULL
 );
+CREATE UNIQUE INDEX t_chat_message_unique ON t_chat_message(profileId, sourceId, sendId);

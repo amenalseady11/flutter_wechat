@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
+import 'package:flutter_wechat/providers/contact/contact.dart';
+import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/widgets/rotation/rotation.dart';
@@ -24,8 +26,13 @@ class AppBarLoading extends StatelessWidget {
       },
       child: Consumer<SocketState>(
         builder: (context, ss, child) {
+          var exists = false;
+          if (chat.isContactChat)
+            exists = chat.contact.status == ContactStatus.normal;
+          else if (chat.isGroupChat)
+            exists = chat.group.status == GroupStatus.joined;
           return Offstage(
-            offstage: ss.state == SocketStateEnum.connecting,
+            offstage: !exists || ss.state == SocketStateEnum.connecting,
             child: Rotation(
               child: Container(
                 padding:

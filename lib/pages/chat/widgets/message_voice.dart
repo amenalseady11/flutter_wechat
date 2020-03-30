@@ -71,7 +71,7 @@ class _MessageVoiceState extends State<MessageVoice> {
       }),
     ]);
     _play = true;
-    widget.message.state = ChatMessageStates.voiceAlreadyRead;
+    widget.message.readStatus = ChatMessageReadStatus.alreadyRead;
     widget.message.serialize();
     if (mounted) setState(() {});
     var rst = await _player.play(voicePath.split("?").first, isLocal: isLocal);
@@ -144,7 +144,7 @@ class _MessageVoiceState extends State<MessageVoice> {
     );
 
     if (!widget.message.isSelf &&
-        widget.message.state == ChatMessageStates.voiceUnRead) {
+        widget.message.readStatus == ChatMessageReadStatus.unRead) {
       child = Row(children: <Widget>[
         child,
         SizedBox(width: ew(10)),

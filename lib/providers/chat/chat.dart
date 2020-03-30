@@ -1,12 +1,13 @@
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
 import 'package:provider/provider.dart';
 
-class ChatSourceType {
+abstract class ChatSourceType {
   static const int contact = 0;
   static const int group = 1;
 }
@@ -119,6 +120,8 @@ class ChatProvider extends ChangeNotifier {
     try {
       var database = await SqfliteProvider().connect();
 
+      if (profileId == null) profileId = global.profile.profileId;
+
       if (this.serializeId == null || this.serializeId.isNaN) {
         this.serializeId = null;
 
@@ -147,8 +150,7 @@ class ChatProvider extends ChangeNotifier {
 
   Future<ChatMessageProvider> addMessage(ChatMessageProvider message) async {
     await message.serialize(forceUpdate: true);
-    if (this.latestMsg == null ||
-        message.sendTime.compareTo(latestMsg.sendTime) > 0) {
+    if (message.sendTime.compareTo(latestUpdateTime) > 0) {
       this.latestMsg = message;
     }
     if (message.sendTime.compareTo(this.latestUpdateTime) > 0)
@@ -164,5 +166,9 @@ class ChatProvider extends ChangeNotifier {
     }
     await this.serialize(forceUpdate: true);
     return message;
+  }
+
+  void forceUpdate() {
+    notifyListeners();
   }
 }

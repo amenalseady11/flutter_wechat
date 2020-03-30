@@ -20,6 +20,7 @@ class GroupMemberProvider extends ChangeNotifier {
   ///  1：正常  0：全体禁言
   int forbidden;
   DateTime instTime;
+  DateTime updtTime;
 
   GroupMemberProvider({
     this.groupId,
@@ -31,6 +32,7 @@ class GroupMemberProvider extends ChangeNotifier {
     this.role = -1,
     this.forbidden = 0,
     this.instTime,
+    this.updtTime,
   });
 
   get name {
@@ -39,24 +41,32 @@ class GroupMemberProvider extends ChangeNotifier {
     return mobile ?? "";
   }
 
+  get roleSort {
+    if (isMaster) return 2;
+    if (isAdmin) return 1;
+    return 0;
+  }
+
   get isAdmin => isMaster || role == GroupMemberRoles.admin;
 
   get isMaster => role == GroupMemberRoles.master;
 
   static GroupMemberProvider fromJson(Map<String, dynamic> json) {
     return GroupMemberProvider(
-      groupId: json["groupId"] as String,
-      friendId: json["friendId"] as String,
-      mobile: json["mobile"] as String,
-      nickname: json["nickname"] as String,
-      remark: json["remark"] as String,
-      avatar: json["avatar"] as String,
-      role: json["role"] as int,
-      forbidden: json["forbidden"] as int,
-      instTime: json['instTime'] == null
-          ? DateTime.now()
-          : DateTime.fromMillisecondsSinceEpoch(json['instTime']),
-    );
+        groupId: json["groupId"] as String,
+        friendId: json["friendId"] as String,
+        mobile: json["mobile"] as String,
+        nickname: json["nickname"] as String,
+        remark: json["remark"] as String,
+        avatar: json["avatar"] as String,
+        role: json["role"] as int,
+        forbidden: json["forbidden"] as int,
+        instTime: json['instTime'] == null
+            ? DateTime.now()
+            : DateTime.fromMillisecondsSinceEpoch(json['instTime']),
+        updtTime: json['updtTime'] == null
+            ? DateTime.now()
+            : DateTime.fromMillisecondsSinceEpoch(json['updtTime']));
   }
 
   Map<String, dynamic> toJson() {
@@ -70,6 +80,7 @@ class GroupMemberProvider extends ChangeNotifier {
       "role": role,
       "forbidden": forbidden,
       "instTime": this.instTime?.millisecondsSinceEpoch,
+      "updtTime": this.updtTime?.millisecondsSinceEpoch,
     };
   }
 }
