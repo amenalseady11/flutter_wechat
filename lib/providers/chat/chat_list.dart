@@ -55,7 +55,7 @@ class ChatListProvider extends ChangeNotifier {
       var map = this.map;
 
       var list1 = await database.query(ChatMessageProvider.tableName,
-          groupBy: "sourceId", orderBy: "sendTime desc");
+          groupBy: "profileId, sourceId", having: "sendTime = max(sendTime)");
 
       list1.forEach((json) {
         var message = ChatMessageProvider.fromJson(json);
