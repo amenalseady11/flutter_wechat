@@ -41,7 +41,9 @@ class _ChatSetContactPageState extends State<ChatSetContactPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ew(80)),
         child: AppBar(
-            title: Text("聊天信息"), centerTitle: false, titleSpacing: -ew(20)),
+            title: Text("聊天信息", style: TextStyle(fontSize: sp(34))),
+            centerTitle: false,
+            titleSpacing: -ew(20)),
       ),
       body: ListView(shrinkWrap: true, children: <Widget>[
         _buildHead(context),
@@ -113,14 +115,16 @@ class _ChatSetContactPageState extends State<ChatSetContactPage> {
       SwitchListTile(
         value: _chat.mute,
         activeColor: Style.pTintColor,
-        title: Text("消息免打扰"),
+        title: Text("消息免打扰",
+            style: TextStyle(color: Style.tTextColor, fontSize: sp(31))),
         onChanged: (_) => _setMuteChat(context, _),
       ),
       Divider(height: ew(1), color: Style.pDividerColor),
       SwitchListTile(
         value: _chat.top,
         activeColor: Style.pTintColor,
-        title: Text("置顶聊天"),
+        title: Text("置顶聊天",
+            style: TextStyle(color: Style.tTextColor, fontSize: sp(31))),
         onChanged: (_) => _setTopChat(context, _),
       ),
     ]);
@@ -129,7 +133,10 @@ class _ChatSetContactPageState extends State<ChatSetContactPage> {
   _buildPane2(BuildContext context) {
     return Column(children: <Widget>[
       Container(height: ew(16), color: Style.pBackgroundColor),
-      ListTile(title: Text('清空聊天记录'), onTap: () => _clearChatRecords(context)),
+      ListTile(
+          title: Text('清空聊天记录',
+              style: TextStyle(color: Style.tTextColor, fontSize: sp(31))),
+          onTap: () => _clearChatRecords(context)),
 //      Divider(height: ew(1), color: Style.pDividerColor),
       Container(height: ew(16), color: Style.pBackgroundColor),
     ]);

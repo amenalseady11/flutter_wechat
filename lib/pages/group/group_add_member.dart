@@ -65,7 +65,11 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
         child: AppBar(
           titleSpacing: -ew(20),
           centerTitle: false,
-          title: _group.groupId == null ? Text("发起群聊") : Text("选择成员"),
+          title: _group.groupId == null
+              ? Text("发起群聊",
+                  style: TextStyle(fontSize: sp(32), color: Style.tTextColor))
+              : Text("选择成员",
+                  style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
           actions: <Widget>[
             _buildSaveBtn(context),
           ],
@@ -79,7 +83,7 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
     return Container(
       margin: EdgeInsets.only(right: ew(20)),
       padding: EdgeInsets.symmetric(vertical: ew(10), horizontal: ew(0)),
-      width: ew(160),
+      constraints: BoxConstraints(minWidth: ew(140)),
       child: RaisedButton(
         color: Style.pTintColor,
         textColor: Colors.white,
@@ -199,7 +203,8 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
             child: Row(children: <Widget>[
               CAvatar(avatar: contact.avatar, size: ew(72), radius: ew(8)),
               SizedBox(width: ew(20)),
-              Text(contact.name)
+              Text(contact.name,
+                  style: TextStyle(fontSize: sp(32), color: Style.tTextColor))
             ]),
           ),
         ),

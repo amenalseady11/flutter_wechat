@@ -25,7 +25,6 @@ class ChatsPage extends StatelessWidget {
           ..sort((d1, d2) {
             return d2.sortTime.compareTo(d1.sortTime);
           });
-        ;
       },
       builder: (BuildContext context, List<ChatProvider> chats, Widget child) {
         return ListView.builder(

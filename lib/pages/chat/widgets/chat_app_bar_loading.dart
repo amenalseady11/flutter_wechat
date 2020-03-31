@@ -16,19 +16,25 @@ class AppBarLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     var socketState = socket.getSocketState(
         private: chat.isContactChat, sourceId: chat.sourceId);
+    var prev, current;
+    prev = socketState.state;
     return StreamProvider.value(
       initialData: socketState,
       value: socket.stateStream.stream,
-      updateShouldNotify: (SocketState prev, SocketState next) {
-        if (prev.sourceId != next.sourceId) return false;
-        if (prev.state == next.state) return false;
+      updateShouldNotify: (p, c) {
+        current = socket
+            .getSocketState(
+                private: chat.isContactChat, sourceId: chat.sourceId)
+            .state;
+        if (current == prev) return false;
+        prev = current;
         return true;
       },
       child: Consumer<SocketState>(
         builder: (context, ss, child) {
           var exists = false;
           if (chat.isContactChat)
-            exists = chat.contact.status == ContactStatus.normal;
+            exists = chat.contact.status == ContactStatus.friend;
           else if (chat.isGroupChat)
             exists = chat.group.status == GroupStatus.joined;
           return Offstage(

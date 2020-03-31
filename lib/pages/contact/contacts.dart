@@ -42,6 +42,7 @@ class _ContactsPageState extends State<ContactsPage> {
   String _suspensionTag = "";
 
   var _refreshController = RefreshController(initialRefresh: false);
+  ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -72,7 +73,7 @@ class _ContactsPageState extends State<ContactsPage> {
       child: Selector<ContactListProvider, List<ContactProvider>>(
         selector: (context, clp) {
           var contacts = clp.contacts
-              .where((d) => d.status == ContactStatus.normal)
+              .where((d) => d.status == ContactStatus.friend)
               .toList()
                 ..sort((d1, d2) {
                   var rst =
@@ -84,25 +85,29 @@ class _ContactsPageState extends State<ContactsPage> {
           return contacts;
         },
         builder: (context, contacts, child) {
-          return AzListView(
-            header: _buildAzListViewHeader(context),
-            data: contacts,
-            itemBuilder: (context, model) {
-              return ContactItemWidget(
-                contact: model,
-                susWidget: _buildSusWidget(model.getSuspensionTag()),
-                itemHeight: _itemHeight,
-              );
-            },
-            suspensionWidget: _buildSusWidget(_suspensionTag),
-            isUseRealIndex: false,
-            itemHeight: _itemHeight.toInt(),
-            suspensionHeight: _suspensionHeight,
-            onSusTagChanged: (tag) {
-              setState(() {
-                _suspensionTag = tag;
-              });
-            },
+          return SingleChildScrollView(
+            child: AzListView(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              header: _buildAzListViewHeader(context),
+              data: contacts,
+              itemBuilder: (context, model) {
+                return ContactItemWidget(
+                  contact: model,
+                  susWidget: _buildSusWidget(model.getSuspensionTag()),
+                  itemHeight: _itemHeight,
+                );
+              },
+              suspensionWidget: _buildSusWidget(_suspensionTag),
+              isUseRealIndex: false,
+              itemHeight: _itemHeight.toInt(),
+              suspensionHeight: _suspensionHeight,
+              onSusTagChanged: (tag) {
+                setState(() {
+                  _suspensionTag = tag;
+                });
+              },
+            ),
           );
         },
       ),
@@ -149,7 +154,8 @@ class _ContactsPageState extends State<ContactsPage> {
                 fit: BoxFit.cover,
               ),
             ),
-            title: Text(item.title ?? ""),
+            title: Text(item.title ?? "",
+                style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
             onTap: () => _onTap2(item.key)),
       ),
       Divider(
@@ -201,11 +207,9 @@ class _ContactItemWidgetState extends State<ContactItemWidget> {
               child: ListTile(
                 leading: CAvatar(
                     avatar: contact.avatar, size: ew(80), radius: ew(8)),
-                title: Text(contact.name),
-//                subtitle: Text("手机号：" +
-//                    (contact.mobile.length >= 11
-//                        ? TextUtil.hideNumber(contact.mobile)
-//                        : contact.mobile)),
+                title: Text(contact.name,
+                    style:
+                        TextStyle(fontSize: sp(32), color: Style.tTextColor)),
                 onTap: () {
                   Routers.navigateTo(context,
                       Routers.contact + "?friendId=${contact.friendId}");

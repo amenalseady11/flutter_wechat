@@ -65,14 +65,15 @@ class _GroupsPageState extends State<GroupsPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ew(80)),
         child: AppBar(
-          title: Text('群聊'),
+          title: Text('群聊',
+              style: TextStyle(fontSize: sp(34), color: Style.tTextColor)),
           centerTitle: false,
           titleSpacing: -ew(20),
           actions: <Widget>[
             FlatButton(
               child: Text('发起群聊',
                   style:
-                      TextStyle(fontSize: sp(28), fontWeight: FontWeight.w400)),
+                      TextStyle(fontSize: sp(31), fontWeight: FontWeight.w400)),
               onPressed: () => Routers.navigateTo(
                   context, Routers.groupAddMember,
                   replace: false),
@@ -99,6 +100,7 @@ class _GroupsPageState extends State<GroupsPage> {
           builder: (context, groups, child) {
             return ListView.builder(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: groups.length,
                 itemBuilder: (context, index) {
                   return ChangeNotifierProvider.value(
@@ -122,7 +124,9 @@ class _GroupsPageState extends State<GroupsPage> {
               EdgeInsets.symmetric(vertical: ew(16), horizontal: ew(30)),
           leading: GroupAvatar(avatars: group.avatars),
           title: Text(group.name + "(${group.members.length})",
-              maxLines: 1, overflow: TextOverflow.ellipsis),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: sp(34), color: Style.tTextColor)),
           trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
               width: ew(16), height: ew(26)),
           onTap: () async {

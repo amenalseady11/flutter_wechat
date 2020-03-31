@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 /// 联系人状态
 abstract class ContactStatus {
   /// 正常（朋友状态）
-  static const int normal = 0;
+  static const int friend = 0;
 
   /// 不是朋友（查询朋友数据不正常）
   static const int notFriend = 1;
@@ -72,7 +72,7 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
   int black = ContactBlackStatus.normal;
 
   /// [ContactStatus]
-  int status = ContactStatus.normal;
+  int status = ContactStatus.friend;
 
   bool isShowSuspension = false;
   getSuspensionTag() => initials ?? "#";
@@ -136,7 +136,7 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
         remark: json["remark"] as String,
         initials: json["initials"] as String,
         black: json["black"] as int ?? ContactBlackStatus.normal,
-        status: json["status"] as int ?? ContactStatus.normal,
+        status: json["status"] as int ?? ContactStatus.friend,
         enableUpdate: enableUpdate,
         enableNull: enableNull,
         forceUpdate: forceUpdate,
@@ -158,7 +158,7 @@ class ContactProvider extends ChangeNotifier implements ISuspensionBean {
       "remark": remark,
       "initials": initials,
       "black": black ?? ContactBlackStatus.normal,
-      "status": status ?? ContactStatus.normal,
+      "status": status ?? ContactStatus.friend,
     };
   }
 

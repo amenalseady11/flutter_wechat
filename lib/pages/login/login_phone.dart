@@ -1,3 +1,4 @@
+import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_wechat/apis/apis.dart';
@@ -6,7 +7,6 @@ import 'package:flutter_wechat/providers/profile/profile.dart';
 import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/dialog/dialog.dart';
-import 'package:common_utils/common_utils.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:flutter_wechat/widgets/button/image_button.dart';
@@ -43,55 +43,61 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          // 关闭按钮
-          Container(
-            margin: EdgeInsets.only(
-                top: adapter.media.padding.top + ew(40), left: ew(40)),
-            child: ImageButtonWidget(
-              image: "assets/images/login/wsactionsheet_close_normal_16x16.png",
-              highlightImage:
-                  "assets/images/login/wsactionsheet_close_press_16x16.png",
-              onTap: () => Navigator.pop(context),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // 关闭按钮
+            Container(
+              margin: EdgeInsets.only(
+                  top: adapter.media.padding.top + ew(40), left: ew(40)),
+              child: ImageButtonWidget(
+                image:
+                    "assets/images/login/wsactionsheet_close_normal_16x16.png",
+                highlightImage:
+                    "assets/images/login/wsactionsheet_close_press_16x16.png",
+                onTap: () => Navigator.pop(context),
+              ),
             ),
-          ),
 
-          Container(
-            margin: EdgeInsets.only(top: ew(150)),
-            padding: EdgeInsets.symmetric(horizontal: ew(40)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "手机登录/注册",
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: Colors.black.withOpacity(.9),
-                    fontSize: sp(48),
-                    fontWeight: FontWeight.w500,
+            Container(
+              margin: EdgeInsets.only(top: ew(150)),
+              padding: EdgeInsets.symmetric(horizontal: ew(40)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "手机登录/注册",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(.9),
+                      fontSize: sp(48),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
 
-                SizedBox(height: ew(100)),
-                _buildDivider(),
-                // 地区
-                _buildZoneWidget(context),
-                _buildDivider(),
-                // 手机号
-                _buildPhoneWidget(context),
-                _buildDivider(),
-                // 验证码
-                _buildCaptchaWidget(context),
-                _buildDivider(),
-                _buildLoginButtonWidget(context),
-              ],
+                  SizedBox(height: ew(100)),
+                  _buildDivider(),
+                  // 地区
+                  _buildZoneWidget(context),
+                  _buildDivider(),
+                  // 手机号
+                  _buildPhoneWidget(context),
+                  _buildDivider(),
+                  // 验证码
+                  _buildCaptchaWidget(context),
+                  _buildDivider(),
+                  _buildLoginButtonWidget(context),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -284,6 +290,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
   }
 
   _sendCaptcha(BuildContext context) async {
+    FocusScope.of(context).requestFocus(FocusNode());
     if (_captchaData.disabled) return;
     var phone = _phone.text;
     if (!RegexUtil.isMobileExact(phone))
@@ -326,6 +333,7 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
   }
 
   _login() async {
+    FocusScope.of(context).requestFocus(FocusNode());
     if (this.disableLogin) return;
     if (_loading) return;
     _loading = true;
@@ -355,17 +363,9 @@ class _LoginPhonePageState extends State<LoginPhonePage> {
     profile.avatar = rsp.body["Avatar"] as String ?? "";
     profile.nickname = rsp.body["NickName"] as String ?? "";
 
-    rsp = await toGetTopicOffset(sourceId: profile.friendId);
-    if (!rsp.success) {
-      _loading = false;
-      profile.authToken = null;
-      return Toast.showToast(context, message: rsp.message);
-    }
-
     _loading = false;
-    profile.offset = rsp.body as int ?? 0;
 
-    profile.login();
+    await profile.login();
     HomeProvider.of(context, listen: false).tab = 0;
     Routers.navigateTo(context, Routers.root, clearStack: true);
   }

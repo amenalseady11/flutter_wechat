@@ -33,7 +33,7 @@ class ChatProvider extends ChangeNotifier {
   /// 未读数量
   int unread = 0;
 
-  /// 是否强制标记未读提醒
+  /// true: 是否强制标记已读
   bool unreadTag = false;
 
   /// 是否置顶
@@ -161,8 +161,8 @@ class ChatProvider extends ChangeNotifier {
     }
     if (message.sendTime.compareTo(this.latestUpdateTime) > 0)
       this.latestUpdateTime = message.sendTime;
-    if (!this.visible) this.visible = true;
-    if (this.unreadTag) this.unreadTag = false;
+    this.visible = true;
+    this.unreadTag = false;
     this.unread += 1;
     if (this.offset < message.offset) this.offset = message.offset;
     if (activating) {

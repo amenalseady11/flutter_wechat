@@ -140,7 +140,8 @@ class _GroupDelMemberPageState extends State<GroupDelMemberPage> {
       children: <Widget>[
         ListTile(
           leading: CAvatar(avatar: member.avatar, size: ew(72), radius: ew(8)),
-          title: Text(member.name),
+          title: Text(member.name,
+              style: TextStyle(fontSize: ew(32), color: Style.tTextColor)),
           trailing: global.profile.profileId == member.friendId
               ? null
               : Container(
@@ -152,8 +153,8 @@ class _GroupDelMemberPageState extends State<GroupDelMemberPage> {
                     disabledTextColor: Colors.white60,
                     elevation: 0.0,
                     child: _selects.contains(member.friendId)
-                        ? Text("已踢出")
-                        : Text("踢出"),
+                        ? Text("已踢出", style: TextStyle(fontSize: ew(26)))
+                        : Text("踢出", style: TextStyle(fontSize: ew(26))),
                     onPressed: _selects.contains(member.friendId)
                         ? null
                         : () {

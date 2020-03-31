@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/pages/chat/chat.dart';
-import 'package:flutter_wechat/pages/chat/widgets/bottom_bar_tool_pane.dart';
+import 'package:flutter_wechat/pages/chat/widgets/chat_bottom_bar_tool_pane.dart';
 import 'package:flutter_wechat/pages/chat/widgets/voice_button.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';

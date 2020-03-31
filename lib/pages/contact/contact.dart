@@ -58,11 +58,11 @@ class ContactPage extends StatefulWidget {
     if (json == null) {
       if (clpm.containsKey(friendId)) {
         var contact = clpm[friendId];
-        if (contact.status == ContactStatus.normal) {
+        if (contact.status == ContactStatus.friend) {
           json = contact.toJson();
           json.putIfAbsent(
               "_relation",
-              () => contact.status == ContactStatus.normal
+              () => contact.status == ContactStatus.friend
                   ? _ContactRelation.friend
                   : _ContactRelation.stranger);
           json.putIfAbsent("_isFriend", () => true);

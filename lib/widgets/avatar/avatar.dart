@@ -1,6 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 
 /// 联系人头像
@@ -52,6 +52,12 @@ class CAvatar extends StatelessWidget {
         width: size,
         height: size,
       );
+//    (avatar == null || avatar.isEmpty)
+//        ? Image.asset(
+//      "assets/images/avatar/${Random().nextInt(9)}.jpg",
+//      width: size,
+//      height: size,
+//    )
     Widget child = CachedNetworkImage(
       imageUrl: avatar,
       width: size,

@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:common_utils/common_utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
@@ -44,14 +48,30 @@ abstract class SyncService {
     // TODO: 开发模式调试，清空数据库
 //    if (global.isDevelopment) clearDB();
 
+    if (global.profile.avatar.isEmpty) {
+      Future.microtask(() async {
+        var avatar = "assets/images/avatar/${Random().nextInt(9)}.jpg";
+        var byteData = await rootBundle.load(avatar);
+        var file = MultipartFile.fromBytes(byteData.buffer.asInt8List(),
+            filename: avatar, contentType: MediaType("image", "jpg"));
+        var rsp = await toUploadFile2(file);
+        if (!rsp.success) Toast.showToast(context, message: rsp.message);
+        global.profile.avatar = rsp.body as String ?? "";
+        toUpdateProfile(
+            avatar: global.profile.avatar,
+            nickname: "用户" + global.profile.mobile.substring(7));
+        global.profile.serialize(forceUpdate: true);
+      });
+    }
+
     await Future.wait([
       Provider.of<GroupListProvider>(context, listen: false).deserialize(),
       Provider.of<ContactListProvider>(context, listen: false).deserialize(),
     ]);
 
     await Future.wait<dynamic>([
-      _remoteUpdate(context),
-      Provider.of<ChatListProvider>(context, listen: false).deserialize()
+      Provider.of<ChatListProvider>(context, listen: false).deserialize(),
+      _remoteUpdate(context)
     ]);
 
     var chatMap = Provider.of<ChatListProvider>(context, listen: false).map;

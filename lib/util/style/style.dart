@@ -15,6 +15,9 @@ class Style {
   /// 主要 文字颜色
   static const Color pTextColor = Color.fromRGBO(0, 0, 0, 0.9);
 
+  /// 主要 文字颜色
+  static const Color tTextColor = Color.fromRGBO(0, 0, 0, 0.7);
+
   /// 次要 文字颜色
   static const Color sTextColor = Color.fromRGBO(0, 0, 0, 0.5);
 

@@ -105,7 +105,7 @@ class ContactListProvider extends ChangeNotifier {
         ..remark = json["Remark"] ?? ""
         ..initials = json["Initial"] ?? "#"
         ..black = json["IsBlack"] ?? ContactBlackStatus.normal
-        ..status = ContactStatus.normal;
+        ..status = ContactStatus.friend;
 
       friendIds.add("'${contact.friendId}'");
 
@@ -126,7 +126,7 @@ class ContactListProvider extends ChangeNotifier {
     }
 
     var database = await SqfliteProvider().connect();
-    var where = "profileId = '$profileId' and status = ${ContactStatus.normal}";
+    var where = "profileId = '$profileId' and status = ${ContactStatus.friend}";
     if (friendIds.isNotEmpty)
       where += " and friendId not in (${friendIds.join(",")})";
     counts[2] = await database.update(

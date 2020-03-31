@@ -67,6 +67,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ew(80)),
         child: AppBar(
+          backgroundColor: Colors.white,
           title: Text(
             '${_group.name}(${_group.members.length})',
             maxLines: 1,
@@ -84,7 +85,9 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
           _buildPane2(context),
           Container(height: ew(16), color: Style.pBackgroundColor),
           ListTile(
-              title: Text('清空聊天记录'), onTap: () => _clearChatRecords(context)),
+              title: Text('清空聊天记录',
+                  style: TextStyle(fontSize: sp(31), color: Style.tTextColor)),
+              onTap: () => _clearChatRecords(context)),
           Container(height: ew(16), color: Style.pBackgroundColor),
           _buildPane3(context),
           Container(height: ew(16), color: Style.pBackgroundColor),
@@ -157,7 +160,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style:
-                          TextStyle(color: Style.sTextColor, fontSize: sp(24))),
+                          TextStyle(color: Style.sTextColor, fontSize: sp(22))),
                 ],
               ),
             );
@@ -194,14 +197,15 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
       ListTile(
         leading: Container(
             width: ew(160),
-            child: Text('群聊名称', style: TextStyle(fontSize: sp(30)))),
+            child: Text('群聊名称',
+                style: TextStyle(fontSize: sp(32), color: Style.tTextColor))),
         title: Text(
           _group.name ?? "",
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
+              fontSize: sp(31),
               color: Style.sTextColor,
-              fontSize: sp(32),
               fontWeight: FontWeight.w300),
         ),
         trailing: !isAdmin
@@ -214,7 +218,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
 //        ListTile(
 //          leading: Container(
 //              width: ew(160),
-//              child: Text('群二维码', style: TextStyle(fontSize: sp(30)))),
+//              child: Text('群二维码', style: TextStyle(fontSize: sp(31)))),
 //          trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
 //              width: ew(16), height: ew(26)),
 //          onTap: () {},
@@ -224,7 +228,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
         title: Container(
             width: ew(160),
             padding: EdgeInsets.only(top: ew(20)),
-            child: Text('群聊公告', style: TextStyle(fontSize: sp(30)))),
+            child: Text('群聊公告',
+                style: TextStyle(fontSize: sp(31), color: Style.tTextColor))),
         subtitle: Container(
           padding: EdgeInsets.symmetric(vertical: ew(10)),
           constraints: BoxConstraints(minHeight: ew(80)),
@@ -244,16 +249,18 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
       ListTile(
         title: Container(
             width: ew(160),
-            child: Text('群主及管理员', style: TextStyle(fontSize: sp(30)))),
+            child: Text('群主及管理员',
+                style: TextStyle(fontSize: sp(31), color: Style.tTextColor))),
         trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
             width: ew(16), height: ew(26)),
         onTap: () => _setGroupAdmin(context),
       ),
       Divider(height: ew(1), color: Style.pDividerColor),
       SwitchListTile(
-        value: _self.forbidden == 0,
+        value: _group.forbidden == GroupForbiddenStatus.forbidden,
         activeColor: Style.pTintColor,
-        title: Text("全体禁言"),
+        title: Text("全体禁言",
+            style: TextStyle(fontSize: sp(31), color: Style.tTextColor)),
         onChanged: (_) => _setGroupForbidden(context),
       ),
     ]);
@@ -269,25 +276,26 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
       SwitchListTile(
         value: _chat.mute,
         activeColor: Style.pTintColor,
-        title: Text("消息免打扰"),
+        title: Text("消息免打扰", style: TextStyle(fontSize: sp(31))),
         onChanged: (_) => _setMuteChat(context, _),
       ),
       Divider(height: ew(1), color: Style.pDividerColor),
       SwitchListTile(
         value: _chat.top,
         activeColor: Style.pTintColor,
-        title: Text("置顶聊天"),
+        title: Text("置顶聊天", style: TextStyle(fontSize: sp(31))),
         onChanged: (_) => _setTopChat(context, _),
       ),
       Divider(height: ew(1), color: Style.pDividerColor),
       ListTile(
-        title: Text("我的本群的昵称"),
+        title: Text("我的本群的昵称",
+            style: TextStyle(fontSize: sp(31), color: Style.tTextColor)),
         trailing: Container(
           width: ew(400),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
             Text(_self.name,
-                style: TextStyle(color: Style.sTextColor, fontSize: sp(32)),
+                style: TextStyle(color: Style.sTextColor, fontSize: sp(31)),
                 overflow: TextOverflow.ellipsis),
             SizedBox(width: ew(20)),
 //            Image.asset("assets/images/icons/tableview_arrow_8x13.png",
@@ -302,7 +310,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     if (isMaster) {
       return ListTile(
         title: Text('删除并退出',
-            textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.red, fontSize: sp(31))),
         onTap: () => _dismissGroup(context),
       );
     }
@@ -310,7 +319,8 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
     if (isAdmin) {
       return ListTile(
         title: Text('退出群聊',
-            textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.red, fontSize: sp(31))),
         onTap: () => _signOutGroup(context),
       );
     }

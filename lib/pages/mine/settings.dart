@@ -18,20 +18,23 @@ class SettingsPage extends StatelessWidget {
           preferredSize: Size.fromHeight(ew(80)),
           child: AppBar(
               elevation: 0,
-              titleSpacing: 0,
-              title: Text("设置"),
+              titleSpacing: -ew(20),
+              title: Text("设置",
+                  style: TextStyle(fontSize: sp(36), color: Style.tTextColor)),
               centerTitle: false,
               backgroundColor: Style.pBackgroundColor)),
       body: Column(
         children: <Widget>[
           Container(height: ew(20), color: Style.pBackgroundColor),
           ListTile(
-            title: Text("隐私设置"),
+            title: Text("隐私设置",
+                style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
             onTap: () => Routers.navigateTo(context, Routers.privacySettings),
           ),
           Container(height: ew(20), color: Style.pBackgroundColor),
           ListTile(
-            title: Text("关于"),
+            title: Text("关于",
+                style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
             trailing: Image.asset(
                 "assets/images/icons/tableview_arrow_8x13.png",
                 width: ew(16),
@@ -40,13 +43,16 @@ class SettingsPage extends StatelessWidget {
           ),
           Divider(height: ew(1), color: Style.pDividerColor),
           ListTile(
-            title: Text("诊断"),
+            title: Text("诊断",
+                style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
             trailing: Text("163ms"),
 //            onTap: () => Routers.navigateTo(context, Routers.networkDiagnosis),
           ),
           Container(height: ew(20), color: Style.pBackgroundColor),
           ListTile(
-            title: Text("退出", textAlign: TextAlign.center),
+            title: Text("退出",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
             onTap: () => _showLogoutAsMenu(context),
           ),
           Expanded(child: Container(color: Style.pDividerColor)),
@@ -60,7 +66,8 @@ class SettingsPage extends StatelessWidget {
 
     List<Widget> actions = [];
     actions.add(ActionSheetAction(
-      child: Text('退出登录'),
+      child: Text('退出登录',
+          style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
       onPressed: () {
         Navigator.of(context).pop();
         completer.complete("logout");
@@ -68,7 +75,8 @@ class SettingsPage extends StatelessWidget {
     ));
 
     actions.add(ActionSheetAction(
-      child: Text('关闭应用'),
+      child: Text('关闭应用',
+          style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
       onPressed: () {
         Navigator.of(context).pop();
         completer.complete("close");

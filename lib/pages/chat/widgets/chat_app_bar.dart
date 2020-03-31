@@ -7,7 +7,7 @@ import 'package:flutter_wechat/routers/routers.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:provider/provider.dart';
 
-import 'app_bar_loading.dart';
+import 'chat_app_bar_loading.dart';
 
 class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override

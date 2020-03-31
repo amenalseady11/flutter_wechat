@@ -54,6 +54,16 @@ class ChatListProvider extends ChangeNotifier {
 
       var map = this.map;
 
+      await database.update(ChatMessageProvider.tableName,
+          {"status": ChatMessageStatus.sendError},
+          where: "profileId = ? and status = ?",
+          whereArgs: [profileId, ChatMessageStatus.sending]);
+
+      await database.update(ChatMessageProvider.tableName,
+          {"status": ChatMessageStatus.withdrawing},
+          where: "profileId = ? and status = ?",
+          whereArgs: [profileId, ChatMessageStatus.withdrawing]);
+
       var list1 = await database.query(ChatMessageProvider.tableName,
           groupBy: "profileId, sourceId",
           having:
@@ -89,24 +99,32 @@ class ChatListProvider extends ChangeNotifier {
           where: "profileId = ? and sourceId = ?",
           whereArgs: [profileId, sourceId]);
 
+      if (chat.isGroupChat && chat.group.status != GroupStatus.joined)
+        real = true;
+      if (chat.isContactChat && chat.contact.status != ContactStatus.friend)
+        real = true;
+
       if (!real) {
         chat.unreadTag = false;
         chat.top = false;
+        chat.visible = false;
         var rst = chat.serialize(forceUpdate: true);
         this.sort(forceUpdate: true);
         return rst;
       }
+
       chats.remove(chat);
 
-      socket.remove(private: false, sourceId: sourceId);
+      if (chat.isGroupChat) {
+        socket.remove(private: false, sourceId: sourceId);
+        // 删除群组
+        await database.delete(GroupProvider.tableName,
+            where: "profileId = ? and groupId = ?",
+            whereArgs: [profileId, sourceId]);
+      }
 
       // 删除话题
       await database.delete(ChatProvider.tableName,
-          where: "profileId = ? and groupId = ?",
-          whereArgs: [profileId, sourceId]);
-
-      // 删除群组
-      await database.delete(GroupProvider.tableName,
           where: "profileId = ? and groupId = ?",
           whereArgs: [profileId, sourceId]);
 

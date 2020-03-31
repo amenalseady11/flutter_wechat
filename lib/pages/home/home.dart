@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_wechat/pages/chat/chats.dart';
 import 'package:flutter_wechat/pages/contact/contacts.dart';
 import 'package:flutter_wechat/pages/discover/discover.dart';
+import 'package:flutter_wechat/pages/home/widgets/home_app_bar.dart';
 import 'package:flutter_wechat/pages/mine/mine.dart';
 import 'package:flutter_wechat/pages/mine/qr_code_scan.dart';
 import 'package:flutter_wechat/providers/home/home.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/widgets/menu/menu.dart';
 import 'package:flutter_wechat/widgets/rotation/rotation.dart';
+import 'package:provider/provider.dart';
 
 class _HomeSubPage {
   const _HomeSubPage({
@@ -43,28 +45,14 @@ class _HomePageState extends State<HomePage> {
   PageController _page;
 
   GlobalKey<MenuWidgetState> _menuKey = GlobalKey(debugLabel: 'menu_key');
-
-  bool _loading = true;
-
-  _initData() async {
-    if (socket.started) {
-      _loading = false;
-      return;
-    }
-
-    await Future.microtask(() {});
-    await SyncService.toSyncData(context);
-
-    _loading = false;
-    if (mounted) setState(() {});
-  }
+  GlobalKey<MenuWidgetState> _appKey = GlobalKey(debugLabel: 'app_key');
 
   @override
   void initState() {
     super.initState();
-    this._initData();
     _page = PageController(
         initialPage: HomeProvider.of(context, listen: false).tab);
+
     _pages.addAll([
       _HomeSubPage(
           title: "会话",
@@ -72,24 +60,21 @@ class _HomePageState extends State<HomePage> {
           activeIcon: ("assets/images/tabbar/icons_filled_chats.svg"),
           page: ChatsPage()),
       _HomeSubPage(
-        title: "联系人",
-        icon: ("assets/images/tabbar/icons_outlined_contacts.svg"),
-        activeIcon: ("assets/images/tabbar/icons_filled_contacts.svg"),
-        page: ContactsPage(),
-      ),
+          title: "联系人",
+          icon: ("assets/images/tabbar/icons_outlined_contacts.svg"),
+          activeIcon: ("assets/images/tabbar/icons_filled_contacts.svg"),
+          page: ContactsPage()),
       _HomeSubPage(
-        title: "发现",
-        icon: ("assets/images/tabbar/icons_outlined_discover.svg"),
-        activeIcon: ("assets/images/tabbar/icons_filled_discover.svg"),
-        page: DiscoverPage(),
-      ),
+          title: "发现",
+          icon: ("assets/images/tabbar/icons_outlined_discover.svg"),
+          activeIcon: ("assets/images/tabbar/icons_filled_discover.svg"),
+          page: DiscoverPage()),
       _HomeSubPage(
-        title: "我",
-        showTitle: false,
-        icon: ("assets/images/tabbar/icons_outlined_me.svg"),
-        activeIcon: ("assets/images/tabbar/icons_filled_me.svg"),
-        page: MinePage(),
-      ),
+          title: "我",
+          showTitle: false,
+          icon: ("assets/images/tabbar/icons_outlined_me.svg"),
+          activeIcon: ("assets/images/tabbar/icons_filled_me.svg"),
+          page: MinePage()),
     ]);
 
     var w = ew(56);
@@ -97,20 +82,9 @@ class _HomePageState extends State<HomePage> {
       _HomeSubPage sub = _pages[i];
       bars.add(
         BottomNavigationBarItem(
-          icon: Stack(
-            alignment: Alignment.topRight,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(bottom: ew(4)),
-                child: SvgPicture.asset(sub.icon, width: w, height: w),
-              ),
-              Container(
-                width: ew(20),
-                height: ew(20),
-                decoration:
-                    BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-              )
-            ],
+          icon: Padding(
+            padding: EdgeInsets.only(bottom: ew(4)),
+            child: SvgPicture.asset(sub.icon, width: w, height: w),
           ),
           activeIcon: Padding(
             padding: EdgeInsets.only(bottom: ew(4)),
@@ -173,74 +147,52 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    return AbsorbPointer(
-      absorbing: _loading,
-      child: Material(
-        child: Stack(
-          children: <Widget>[
-            Scaffold(
-              appBar: _buildAppBar(context),
-              body: body,
-              bottomNavigationBar: bottomBar,
-            ),
-            MenuWidget(
-                key: _menuKey,
-                menus: <MenuItem>[
-                  MenuItem("add_group_chat",
-                      "assets/images/contacts/icons_filled_chats.svg", "发起群聊"),
-                  MenuItem(
-                      "add_contact",
-                      "assets/images/contacts/icons_filled_add-friends.svg",
-                      "添加朋友"),
-                  MenuItem("qrcode_scan",
-                      "assets/images/icons/icons_filled_scan.svg", "扫一扫"),
+    return FutureProvider(
+      initialData: true,
+      create: (context) async {
+        if (socket.started) return false;
+        await Future.microtask(() {});
+        await SyncService.toSyncData(context);
+        return false;
+      },
+      child: Consumer<bool>(
+        child: Material(
+          child: Stack(
+            children: <Widget>[
+              Scaffold(
+                appBar: HomeAppBar(
+                    key: _appKey,
+                    title: _pages[HomeProvider.of(context).tab].title,
+                    onPressed: () {
+                      _menuKey.currentState.visible = true;
+                    }),
+                body: body,
+                bottomNavigationBar: bottomBar,
+              ),
+              MenuWidget(
+                  key: _menuKey,
+                  menus: <MenuItem>[
+                    MenuItem(
+                        "add_group_chat",
+                        "assets/images/contacts/icons_filled_chats.svg",
+                        "发起群聊"),
+                    MenuItem(
+                        "add_contact",
+                        "assets/images/contacts/icons_filled_add-friends.svg",
+                        "添加朋友"),
+                    MenuItem("qrcode_scan",
+                        "assets/images/icons/icons_filled_scan.svg", "扫一扫"),
 //                MenuItem("help",
 //                    "assets/images/contacts/icons_filled_chats.svg", "帮助与反馈"),
-                ],
-                onTap: _onTapMenu),
-          ],
+                  ],
+                  onTap: _onTapMenu),
+            ],
+          ),
         ),
+        builder: (context, loading, child) {
+          return AbsorbPointer(absorbing: loading, child: child);
+        },
       ),
-    );
-  }
-
-  _buildAppBar(BuildContext context) {
-    var tab = HomeProvider.of(context, listen: false).tab;
-    var title = _pages[tab].title;
-    if (!_pages[tab].showTitle) return null;
-    return PreferredSize(
-      child: AppBar(
-        centerTitle: false,
-        elevation: 0,
-        title: Row(
-          children: <Widget>[
-            Text(title, style: TextStyle(fontSize: sp(34))),
-            Offstage(
-              offstage: !_loading,
-              child: Rotation(
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: ew(10), vertical: ew(10)),
-                  child: SvgPicture.asset("assets/images/icons/loading.svg",
-                      width: ew(32), height: ew(32), color: Colors.grey),
-                ),
-              ),
-            )
-          ],
-        ),
-        actions: <Widget>[
-          IconButton(
-            icon: SvgPicture.asset(
-              'assets/images/icons/icons_outlined_add2.svg',
-              color: Color(0xFF181818),
-            ),
-            onPressed: () {
-              _menuKey.currentState.visible = true;
-            },
-          )
-        ],
-      ),
-      preferredSize: Size.fromHeight(ew(80)),
     );
   }
 

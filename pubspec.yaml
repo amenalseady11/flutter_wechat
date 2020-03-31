@@ -87,6 +87,7 @@ flutter:
 
   assets:
     - assets/data/sql/
+    - assets/images/avatar/
     - assets/images/icons/
     - assets/images/login/
     - assets/images/tabbar/

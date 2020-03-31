@@ -14,11 +14,13 @@ class MinePage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: <Widget>[
-          SizedBox(height: adapter.media.padding.top),
+//          SizedBox(height: adapter.media.padding.top),
           _buildHead(context),
+          SizedBox(height: ew(60)),
           Divider(height: ew(1), color: Style.pDividerColor),
           ListTile(
-            title: Text("二维码名片"),
+            title: Text("二维码名片",
+                style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
             onTap: () => Routers.navigateTo(context, Routers.qrCode),
             trailing: Image.asset(
                 "assets/images/icons/tableview_arrow_8x13.png",
@@ -35,7 +37,7 @@ class MinePage extends StatelessWidget {
   _buildHead(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: ew(40), vertical: ew(60)),
+      padding: EdgeInsets.symmetric(horizontal: ew(40)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -93,21 +95,24 @@ class MinePage extends StatelessWidget {
       children: <Widget>[
         Container(height: ew(20), color: Style.pBackgroundColor),
         ListTile(
-          title: Text("消息通知"),
+          title: Text("消息通知",
+              style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
           onTap: () => Routers.navigateTo(context, Routers.messageNotice),
           trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
               width: ew(16), height: ew(26)),
         ),
         Container(height: ew(20), color: Style.pBackgroundColor),
         ListTile(
-          title: Text("账号与安全"),
+          title: Text("账号与安全",
+              style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
           onTap: () => Routers.navigateTo(context, Routers.accountSecurity),
           trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
               width: ew(16), height: ew(26)),
         ),
         Divider(height: ew(1), color: Style.pDividerColor),
         ListTile(
-          title: Text("设置"),
+          title: Text("设置",
+              style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
           onTap: () => Routers.navigateTo(context, Routers.settings),
           trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
               width: ew(16), height: ew(26)),

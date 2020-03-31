@@ -111,8 +111,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
             },
           ),
         ),
-        title: Text(mini["MiniName"] ?? ""),
-        subtitle: Text(mini["MiniDesc"] ?? "'"),
+        title: Text(mini["MiniName"] ?? "",
+            style: TextStyle(fontSize: sp(34), color: Style.tTextColor)),
+        subtitle: Text(mini["MiniDesc"] ?? "'",
+            style: TextStyle(fontSize: sp(26), color: Style.sTextColor)),
         trailing: Image.asset("assets/images/icons/tableview_arrow_8x13.png",
             width: ew(16), height: ew(26)),
         onTap: () {

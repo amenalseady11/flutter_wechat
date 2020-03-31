@@ -30,6 +30,8 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
 
   List<String> _selects = [];
 
+  ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +66,7 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ew(80)),
         child: AppBar(
+          backgroundColor: Colors.grey.withOpacity(0.1),
           titleSpacing: -ew(20),
           centerTitle: false,
           title: Text("设置管理员"),
@@ -75,10 +78,12 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
 
   _buildChild(BuildContext context) {
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Column(
         children: <Widget>[
           _buildSearch(context),
           ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemCount: members.length > 0 ? members.length : 1,
             itemBuilder: (BuildContext context, int index) {
@@ -139,58 +144,77 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        ListTile(
-          leading: CAvatar(avatar: member.avatar, size: ew(72), radius: ew(8)),
-          title: Text(member.name),
-          trailing: getTrailing(context, member) ??
-              Container(
-                padding: EdgeInsets.symmetric(vertical: ew(24)),
-                constraints: BoxConstraints(minWidth: ew(140)),
-                child: RaisedButton(
-                  color: !member.isAdmin ? Colors.redAccent : Style.pTintColor,
-                  textColor: Colors.white,
-                  elevation: 0.0,
-                  child: member.isAdmin ? Text("管理员") : Text("成员"),
-                  onPressed: () => _setAdmin(context, member),
-                ),
+        getTrailing(context, member) ??
+            SwitchListTile(
+              value: member.isAdmin,
+              activeColor: Style.pTintColor,
+              title: Row(
+                children: <Widget>[
+                  CAvatar(avatar: member.avatar, size: ew(72), radius: ew(8)),
+                  SizedBox(width: ew(20)),
+                  Text(member.name,
+                      style:
+                          TextStyle(fontSize: sp(32), color: Style.tTextColor)),
+                ],
               ),
-        ),
+              onChanged: (_) {
+                _setAdmin(context, member);
+              },
+            ),
+//        ListTile(
+//          leading: CAvatar(avatar: member.avatar, size: ew(72), radius: ew(8)),
+//          title: Text(member.name,
+//              style: TextStyle(fontSize: sp(30), color: Style.tTextColor)),
+//          trailing: getTrailing(context, member) ??
+//              Container(
+//                padding: EdgeInsets.symmetric(vertical: ew(24)),
+//                constraints: BoxConstraints(minWidth: ew(140)),
+//                child: RaisedButton(
+//                  color: !member.isAdmin ? Colors.redAccent : Style.pTintColor,
+//                  textColor: Colors.white,
+//                  elevation: 0.0,
+//                  child: member.isAdmin ? Text("管理员") : Text("成员"),
+//                  onPressed: () => _setAdmin(context, member),
+//                ),
+//              ),
+//        ),
         Divider(height: ew(1), color: Style.pDividerColor),
       ],
     );
   }
 
   getTrailing(BuildContext context, GroupMemberProvider member) {
+    if (member != _self || !_self.isAdmin) return;
     List<String> rst = [];
-
-    if (member.isMaster) {
-      rst.add("群主");
-    } else if (!_self.isAdmin) {
-      rst.add(member.isAdmin ? '管理员' : '成员');
-    } else if (_self.isAdmin && !_self.isMaster) {
-      rst.add("管理员");
-    }
-
-    if (rst.isNotEmpty)
-      return Container(
-          padding: EdgeInsets.symmetric(vertical: ew(24)),
-          constraints: BoxConstraints(minWidth: ew(140)),
-          child: RaisedButton(
-            disabledTextColor: Colors.white70,
-            disabledElevation: 0,
-            child: Text(rst.join("/")),
-            onPressed: null,
-          ));
-    return null;
+    if (member.isMaster || _self.isMaster) {
+      rst.add('群主');
+    } else if (_self.isAdmin) {
+      rst.add('管理员');
+    } else
+      rst.add('成员');
+    return ListTile(
+      title: Row(
+        children: <Widget>[
+          CAvatar(avatar: member.avatar, size: ew(72), radius: ew(8)),
+          SizedBox(width: ew(20)),
+          Text(member.name,
+              style: TextStyle(fontSize: sp(32), color: Style.tTextColor)),
+        ],
+      ),
+      trailing: Container(
+          padding: EdgeInsets.only(right: ew(34)),
+          child: Text(rst.join('/'),
+              style: TextStyle(fontSize: sp(32), color: Style.sTextColor))),
+    );
   }
 
   _setAdmin(BuildContext context, GroupMemberProvider member) async {
+    if (!_self.isAdmin)
+      return Toast.showToast(context, message: "只有群主及管理员可以设置禁言");
     int role =
         member.isAdmin ? GroupMemberRoles.member : GroupMemberRoles.admin;
     var rsp = await toSetGroupMemberRole(
         groupId: _group.groupId, friendId: member.friendId, role: role);
-    debugPrint(_group.toJson().toString());
-    debugPrint(_group.self.toJson().toString());
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     member.role = role;
     await _group.serialize(forceUpdate: true);

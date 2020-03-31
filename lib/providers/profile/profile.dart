@@ -121,8 +121,10 @@ class ProfileProvider extends ChangeNotifier {
     return rst;
   }
 
-  serialize() {
-    return shared.setJson(SharedKey.profile, this.toJson());
+  serialize({bool forceUpdate: false}) async {
+    bool b = await shared.setJson(SharedKey.profile, this.toJson());
+    if (forceUpdate) notifyListeners();
+    return b;
   }
 
   ProfileProvider deserialize() {
