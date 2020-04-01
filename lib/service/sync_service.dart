@@ -13,7 +13,7 @@ import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
-import 'package:flutter_wechat/socket/socket_v2.dart';
+import 'package:flutter_wechat/service/socket_service.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:provider/provider.dart';
 
@@ -122,20 +122,13 @@ abstract class SyncService {
     LogUtil.v("话题列表：${clp.chats.length}", tag: "### HomePage ###");
     if (clp.chats.length > 0) clp.forceUpdate();
 
-    socket.start();
-    socket.create(
-        private: true,
-        sourceId: global.profile.profileId,
-        getOffset: () => global.profile.offset);
+    socket.open(true, global.profile.profileId, () => global.profile.offset);
 
     chatMap = Provider.of<ChatListProvider>(context, listen: false).map;
     for (GroupProvider group in groups) {
       if (group.status != GroupStatus.joined) continue;
       var chat = chatMap[group.groupId];
-      socket.create(
-          private: false,
-          sourceId: chat.sourceId,
-          getOffset: () => chat.offset);
+      socket.open(false, chat.sourceId, () => chat.offset);
     }
   }
 }

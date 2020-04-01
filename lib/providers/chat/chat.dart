@@ -155,7 +155,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<ChatMessageProvider> addMessage(ChatMessageProvider message) async {
-    await message.serialize(forceUpdate: true);
+    if (!await message.serialize(forceUpdate: true)) return message;
     if (message.sendTime.compareTo(latestUpdateTime) > 0) {
       this.latestMsg = message;
     }
@@ -165,6 +165,10 @@ class ChatProvider extends ChangeNotifier {
     this.unreadTag = false;
     this.unread += 1;
     if (this.offset < message.offset) this.offset = message.offset;
+    if (this.isContactChat && message.offset > global.profile.offset) {
+      global.profile.offset = message.offset;
+      global.profile.serialize();
+    }
     if (activating) {
       this.unread = 0;
       this.unreadTag = false;

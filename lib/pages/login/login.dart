@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/routers/routers.dart';
-import 'package:flutter_wechat/socket/socket.dart';
+import 'package:flutter_wechat/service/socket_service.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    socket.stop();
+    socket.closeAll();
     return Scaffold(
       body: Stack(
         alignment: AlignmentDirectional.bottomCenter,

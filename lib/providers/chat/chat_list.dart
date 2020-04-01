@@ -8,7 +8,7 @@ import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/providers/sqflite/sqflite.dart';
-import 'package:flutter_wechat/socket/socket.dart';
+import 'package:flutter_wechat/service/socket_service.dart';
 import 'package:provider/provider.dart';
 
 import 'chat.dart';
@@ -116,7 +116,7 @@ class ChatListProvider extends ChangeNotifier {
       chats.remove(chat);
 
       if (chat.isGroupChat) {
-        socket.remove(private: false, sourceId: sourceId);
+        socket.close(false, sourceId);
         // 删除群组
         await database.delete(GroupProvider.tableName,
             where: "profileId = ? and groupId = ?",

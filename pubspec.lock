@@ -113,6 +113,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.1.0"
+  event_bus:
+    dependency: "direct main"
+    description:
+      name: event_bus
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.1"
   fluro:
     dependency: "direct main"
     description:
@@ -378,6 +385,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.2"
+  pretty_dio_logger:
+    dependency: "direct main"
+    description:
+      name: pretty_dio_logger
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.1"
   provider:
     dependency: "direct main"
     description:

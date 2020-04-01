@@ -2,17 +2,20 @@ import 'package:azlistview/azlistview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
+import 'package:flutter_wechat/providers/chat/chat.dart';
+import 'package:flutter_wechat/providers/chat/chat_list.dart';
 import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/routers/routers.dart';
-import 'package:flutter_wechat/socket/socket.dart';
+import 'package:flutter_wechat/service/socket_service.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/util/toast/toast.dart';
 import 'package:flutter_wechat/widgets/avatar/avatar.dart';
 import 'package:flutter_wechat/widgets/mh_text_field/mh_text_field.dart';
+import 'package:provider/provider.dart';
 
 class GroupAddMemberPage extends StatefulWidget {
   final String groupId;
@@ -223,9 +226,15 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
 
       var group = await GroupListProvider.of(context, listen: false)
           .saveGroupByMap(rsp.body);
-
-      socket.create(
-          private: false, sourceId: group.groupId, getOffset: () => 0);
+      var chat = ChatProvider(
+        profileId: global.profile.profileId,
+        sourceType: ChatSourceType.group,
+        sourceId: group.groupId,
+        latestUpdateTime: DateTime.now(),
+        visible: false,
+      )..group = group;
+      Provider.of<ChatListProvider>(context, listen: false).chats.add(chat);
+      socket.open(false, group.groupId, () => chat.offset);
 
       /// 这个位置最好返回群组信息
       /// 直接进入群聊聊天界面

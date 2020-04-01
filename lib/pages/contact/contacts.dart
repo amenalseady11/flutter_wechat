@@ -42,7 +42,7 @@ class _ContactsPageState extends State<ContactsPage> {
   String _suspensionTag = "";
 
   var _refreshController = RefreshController(initialRefresh: false);
-  ScrollController _scrollController = ScrollController();
+//  ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {

@@ -99,7 +99,7 @@ class Toast {
       _showing = false;
       _overlayEntry.markNeedsBuild();
       await Future.delayed(Duration(milliseconds: 400));
-      _overlayEntry.remove();
+      _overlayEntry?.remove();
       _overlayEntry = null;
     }
   }

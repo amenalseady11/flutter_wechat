@@ -5,7 +5,7 @@ import 'package:flutter_wechat/providers/chat/chat_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
 import 'package:flutter_wechat/providers/group/group_list.dart';
 import 'package:flutter_wechat/routers/routers.dart';
-import 'package:flutter_wechat/socket/socket.dart';
+import 'package:flutter_wechat/service/socket_service.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/widgets/avatar/group_avatar.dart';
@@ -51,10 +51,7 @@ class _GroupsPageState extends State<GroupsPage> {
       }
       chat.group = group;
       if (group.status != GroupStatus.joined) continue;
-      socket.create(
-          private: false,
-          sourceId: group.groupId,
-          getOffset: () => chat.offset);
+      socket.open(false, group.groupId, () => chat.offset);
     }
   }
 

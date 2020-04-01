@@ -10,12 +10,11 @@ import 'package:flutter_wechat/pages/mine/mine.dart';
 import 'package:flutter_wechat/pages/mine/qr_code_scan.dart';
 import 'package:flutter_wechat/providers/home/home.dart';
 import 'package:flutter_wechat/routers/routers.dart';
+import 'package:flutter_wechat/service/socket_service.dart';
 import 'package:flutter_wechat/service/sync_service.dart';
-import 'package:flutter_wechat/socket/socket.dart';
 import 'package:flutter_wechat/util/adapter/adapter.dart';
 import 'package:flutter_wechat/util/style/style.dart';
 import 'package:flutter_wechat/widgets/menu/menu.dart';
-import 'package:flutter_wechat/widgets/rotation/rotation.dart';
 import 'package:provider/provider.dart';
 
 class _HomeSubPage {

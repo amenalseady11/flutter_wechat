@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat/providers/profile/profile.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// 请求响应体
 class DioResponse {
@@ -31,9 +32,13 @@ class DioResponse {
 
 final Dio dio = Dio()
   ..interceptors.addAll([
-    LogInterceptor(
-      responseHeader: true,
+    PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
       responseBody: true,
+      responseHeader: false,
+      error: true,
+      compact: true,
     ),
     InterceptorsWrapper(
       onRequest: (RequestOptions options) async {

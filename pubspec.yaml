@@ -32,6 +32,8 @@ dependencies:
   fluro: ^1.6.0
   # http客户端 https://github.com/flutterchina/dio
   dio: ^3.0.9
+  # dio 日志格式化 https://github.com/Milad-Akarie/pretty_dio_logger
+  pretty_dio_logger: ^1.1.1
   # JsonWebToken令牌 https://github.com/sidsbrmnn/jwt_decode
   jwt_decode: ^0.1.0
   # 获取App信息 https://github.com/flutter/plugins/tree/master/packages/package_info
@@ -74,6 +76,8 @@ dependencies:
   shimmer: ^1.1.0
   # emoji https://github.com/JeffG05/emoji_picker
   emoji_picker: ^0.1.0
+  # 事件总线 https://github.com/marcojakob/dart-event-bus
+  event_bus: ^1.1.1
 
 dev_dependencies:
   flutter_test:
