@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wechat/global/global.dart';
 
 class GroupMemberRoles {
   static const int member = 0;
@@ -50,6 +51,8 @@ class GroupMemberProvider extends ChangeNotifier {
   get isAdmin => isMaster || role == GroupMemberRoles.admin;
 
   get isMaster => role == GroupMemberRoles.master;
+
+  get isSelf => friendId == global.profile.friendId;
 
   static GroupMemberProvider fromJson(Map<String, dynamic> json) {
     return GroupMemberProvider(

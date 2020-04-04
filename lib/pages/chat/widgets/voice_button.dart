@@ -234,7 +234,7 @@ class _ChatVoiceButtonState extends State<ChatVoiceButton> {
           moveVoiceView();
         },
         child: Container(
-          height: ew(100),
+          height: ew(84),
           child: RaisedButton(
             color: Colors.white,
             disabledColor: Colors.white,

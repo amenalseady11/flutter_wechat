@@ -273,13 +273,13 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
   _buildPane2(BuildContext context) {
     return Column(children: <Widget>[
       Container(height: ew(16), color: Style.pBackgroundColor),
-      SwitchListTile(
-        value: _chat.mute,
-        activeColor: Style.pTintColor,
-        title: Text("消息免打扰", style: TextStyle(fontSize: sp(31))),
-        onChanged: (_) => _setMuteChat(context, _),
-      ),
-      Divider(height: ew(1), color: Style.pDividerColor),
+//      SwitchListTile(
+//        value: _chat.mute,
+//        activeColor: Style.pTintColor,
+//        title: Text("消息免打扰", style: TextStyle(fontSize: sp(31))),
+//        onChanged: (_) => _setMuteChat(context, _),
+//      ),
+//      Divider(height: ew(1), color: Style.pDividerColor),
       SwitchListTile(
         value: _chat.top,
         activeColor: Style.pTintColor,
@@ -414,7 +414,7 @@ class _ChatSetGroupPageState extends State<ChatSetGroupPage> {
   }
 
   _setGroupForbidden(BuildContext context) async {
-    if (!isAdmin) return Toast.showToast(context, message: "只有群主及管理员可以设置禁言");
+    if (!isMaster) return Toast.showToast(context, message: "只有群主可以设置禁言");
 //    Routers.navigateTo(
 //        context, Routers.groupSetForbidden + "?groupId=${_group.groupId}");
     var forbidden = (_self.forbidden + 1) % 2;

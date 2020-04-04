@@ -1,0 +1,10 @@
+":smile:",":blush:",":confused:",":anguished:",":cold_sweat:",":astonished:",":cry:",":joy:",
+":disappointed_relieved:",":disappointed:",":anguished:",":confounded:",":angry:",":dizzy_face:",":expressionless:",":fearful:",
+":flushed:",":frowning:",":grin:",":heart_eyes:",":heart_eyes_cat:",":hushed:",":imp:",":innocent:",
+":kissing_closed_eyes:",":kissing_heart:",":laughing:",":neutral_face:",":no_mouth:",":open_mouth:",":pensive:",":persevere:",
+":rage:",":relaxed:",":relieved:",":scream:",":sleeping:",":broken_heart:",":smirk:",":sob:",
+":stuck_out_tongue_closed_eyes:",":sunglasses:",":sweat_smile:",":sweat:",":triumph:",":unamused:",":wink:",":yum:",
+":cat:",":dog:",":bear:",":chicken:",":cow:",":ghost:",":hear_no_evil:",":koala:",
+":mouse:",":airplane:",":ambulance:",":bike:",":bullettrain_side:",":bus:",":metro:",":oncoming_taxi:",
+":walking:",":apple:",":banana:",":beer:",":birthday:",":cake:",":cherries:",":tada:",
+":clap:",":fist:",":ok_hand:",":pray:",":thumbsup:",":thumbsdown:",":muscle:",":v:"

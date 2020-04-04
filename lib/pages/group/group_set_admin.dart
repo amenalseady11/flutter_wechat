@@ -210,7 +210,7 @@ class _GroupSetAdminPageState extends State<GroupSetAdminPage> {
 
   _setAdmin(BuildContext context, GroupMemberProvider member) async {
     if (!_self.isAdmin)
-      return Toast.showToast(context, message: "只有群主及管理员可以设置禁言");
+      return Toast.showToast(context, message: "只有群主与管理员才可以设置管理员");
     int role =
         member.isAdmin ? GroupMemberRoles.member : GroupMemberRoles.admin;
     var rsp = await toSetGroupMemberRole(

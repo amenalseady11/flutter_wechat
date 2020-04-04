@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:extended_text_field/extended_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/pages/chat/chat.dart';
-import 'package:flutter_wechat/pages/chat/widgets/chat_bottom_bar_tool_pane.dart';
+import 'package:flutter_wechat/pages/chat/widgets/chat_bottom_bar_pane.dart';
+import 'package:flutter_wechat/pages/chat/widgets/chat_bottom_bar_pane_emoji.dart';
+import 'package:flutter_wechat/pages/chat/widgets/chat_bottom_bar_pane_tool.dart';
 import 'package:flutter_wechat/pages/chat/widgets/voice_button.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
@@ -21,14 +24,16 @@ import 'package:permission_handler/permission_handler.dart';
 
 class ChatBottomBar extends StatefulWidget {
   @override
-  _ChatBottomBarState createState() => _ChatBottomBarState();
+  ChatBottomBarState createState() => ChatBottomBarState();
 }
 
-class _ChatBottomBarState extends State<ChatBottomBar> {
+class ChatBottomBarState extends State<ChatBottomBar> {
   TextEditingController _text = TextEditingController();
+  FocusNode _inputFocusNode = FocusNode();
 
   bool _keyboard = true;
   bool _expand = false;
+  bool _expandEmoji = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +49,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         border:
             Border(top: BorderSide(color: Style.pDividerColor, width: ew(1))),
       ),
+      constraints: _keyboard ? null : BoxConstraints(maxHeight: ew(108)),
       child: Column(
         children: <Widget>[
           SizedBox(height: ew(10)),
@@ -51,7 +57,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: children),
           SizedBox(height: ew(10)),
-          _buildToolPane(context),
+          _buildBottomBarPane(context),
         ],
       ),
     );
@@ -78,14 +84,20 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         }
 
         _keyboard = !_keyboard;
+//        if (!_keyboard)
+//          Future.microtask(() {
+//            FocusScope.of(context).requestFocus(_inputFocusNode);
+//          });
         if (_expand) _expand = false;
+        if (_expandEmoji) _expandEmoji = false;
         if (mounted) setState(() {});
       },
     );
   }
 
   Widget _buildCenterChild(BuildContext context) {
-    var input = TextField(
+    var input = ExtendedTextField(
+      focusNode: _inputFocusNode,
       controller: _text,
       minLines: 1,
       maxLines: 5,
@@ -99,7 +111,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
         border: InputBorder.none,
       ),
       onTap: () {
-        if (_expand) {
+        if (_expand && !_expandEmoji) {
           _expand = false;
           if (mounted) setState(() {});
         }
@@ -107,7 +119,7 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
             .toScrollEnd(delay: Future.delayed(Duration(milliseconds: 100)));
       },
       onChanged: (_) {
-        if (_expand) _expand = false;
+        if (_expand && !_expandEmoji) _expand = false;
         if (mounted) setState(() {});
         ChatPageState.of(context, listen: false)
             .toScrollEnd(delay: Future.delayed(Duration(milliseconds: 100)));
@@ -129,44 +141,79 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
   }
 
   Widget _buildRightIcon(BuildContext context) {
-    return Visibility(
-      visible: _text.text.isNotEmpty,
-      child: Container(
-        margin: EdgeInsets.only(left: ew(20), right: ew(10)),
-        child: RaisedButton(
-          elevation: 0,
-          highlightElevation: 0,
-          child: Text("发送"),
-          color: Style.pTintColor,
-          textColor: Colors.white,
-          onPressed: () => _sendText(context),
+    return Row(
+      children: <Widget>[
+        IconButton(
+          icon: SvgPicture.asset(
+              _expandEmoji
+                  ? 'assets/images/icons/keyboard.svg'
+                  : 'assets/images/icons/emoj.svg',
+              color: Style.pTextColor,
+              width: ew(60)),
+          onPressed: () {
+            if (!_keyboard) _keyboard = true;
+            _expandEmoji = !_expandEmoji;
+            _expand = _expandEmoji;
+            if (_expand)
+              ChatPageState.of(context, listen: false).toScrollEnd(
+                  delay: Future.delayed(Duration(milliseconds: 100)));
+            if (mounted) setState(() {});
+          },
         ),
-      ),
-      replacement: IconButton(
-        icon: SvgPicture.asset('assets/images/icons/icons_outlined_add2.svg',
-            color: Style.pTextColor, width: ew(60)),
-        onPressed: () {
-          _expand = !_expand;
-          if (_expand)
-            ChatPageState.of(context, listen: false).toScrollEnd(
-                delay: Future.delayed(Duration(milliseconds: 100)));
-          if (mounted) setState(() {});
-        },
-      ),
+        Visibility(
+          visible: _text.text.isEmpty,
+          child: Row(children: <Widget>[
+            IconButton(
+              icon: SvgPicture.asset('assets/images/icons/add.svg',
+                  color: Style.pTextColor, width: ew(60)),
+              onPressed: () {
+                if (!_keyboard) _keyboard = true;
+                _expand = !_expand || _expandEmoji;
+                _expandEmoji = false;
+
+                if (_expand)
+                  ChatPageState.of(context, listen: false).toScrollEnd(
+                      delay: Future.delayed(Duration(milliseconds: 100)));
+                if (mounted) setState(() {});
+              },
+            ),
+            SizedBox(width: ew(10)),
+          ]),
+          replacement: Container(
+            margin: EdgeInsets.only(right: ew(20)),
+            child: RaisedButton(
+              elevation: 0,
+              highlightElevation: 0,
+              child: Text("发送"),
+              color: Style.pTintColor,
+              textColor: Colors.white,
+              onPressed: () => _sendText(context),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildToolPane(BuildContext context) {
-    return BottomBarToolPane(
-      expand: _expand,
-      onTap: (key) {
-        if (key == "gallery")
-          return _sendImage(context, source: ImageSource.gallery);
+  Widget _buildBottomBarPane(BuildContext context) {
+    var child = _expandEmoji
+        ? ChatBottomBarPaneEmoji(onTap: (emoji) {
+            Toast.showToast(context, message: "emoji:$emoji");
+          })
+        : ChatBottomBarPaneTool(
+            onTap: (key) {
+              if (key == "gallery")
+                return _sendImage(context, source: ImageSource.gallery);
 
-        if (key == "camera")
-          return _sendImage(context, source: ImageSource.camera);
-      },
-    );
+              if (key == "camera")
+                return _sendImage(context, source: ImageSource.camera);
+            },
+          );
+
+    var height = 0.0;
+    if (_expand) height = _expandEmoji ? ew(300) : ew(170);
+
+    return ChatBottomBarPane(height: height, child: child);
   }
 
   Future<ChatMessageProvider> _createSendMsg(

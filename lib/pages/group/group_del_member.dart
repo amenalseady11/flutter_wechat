@@ -152,10 +152,21 @@ class _GroupDelMemberPageState extends State<GroupDelMemberPage> {
                     textColor: Colors.white,
                     disabledTextColor: Colors.white60,
                     elevation: 0.0,
-                    child: _selects.contains(member.friendId)
-                        ? Text("已踢出", style: TextStyle(fontSize: ew(26)))
-                        : Text("踢出", style: TextStyle(fontSize: ew(26))),
-                    onPressed: _selects.contains(member.friendId)
+                    child: Builder(builder: (context) {
+                      if (member.isAdmin)
+                        return Text("群主", style: TextStyle(fontSize: ew(26)));
+
+                      if (member.isSelf)
+                        return Text("本人", style: TextStyle(fontSize: ew(26)));
+
+                      if (_selects.contains(member.friendId))
+                        return Text("已踢出", style: TextStyle(fontSize: ew(26)));
+
+                      return Text("踢出", style: TextStyle(fontSize: ew(26)));
+                    }),
+                    onPressed: (member.isAdmin ||
+                            member.isSelf ||
+                            _selects.contains(member.friendId))
                         ? null
                         : () {
                             _del(member);

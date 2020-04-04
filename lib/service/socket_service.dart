@@ -32,7 +32,7 @@ EventBus _eventBus = EventBus();
 
 final _tag = "### SocketService ###";
 
-var dio = Dio()
+var dio = Dio(BaseOptions(connectTimeout: 0, receiveTimeout: 6000))
   ..interceptors.add(PrettyDioLogger(
     requestHeader: true,
     requestBody: false,
@@ -103,12 +103,12 @@ class SocketConnector {
       var rsp = await toGetTopicOffset(sourceId: sourceId);
       if (rsp.success) {
         offset = rsp.body as int ?? 0;
-        if (private) {
+        if (private && offset > 0) {
           global.profile.offset = offset;
           global.profile.serialize();
         }
         var chat = ChatListProvider().map[this.sourceId];
-        if (chat != null) {
+        if (chat != null && offset > 0) {
           chat.offset = offset;
           chat.serialize();
         }
