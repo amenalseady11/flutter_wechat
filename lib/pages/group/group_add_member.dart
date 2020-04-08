@@ -4,6 +4,7 @@ import 'package:flutter_wechat/apis/apis.dart';
 import 'package:flutter_wechat/global/global.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
 import 'package:flutter_wechat/providers/chat/chat_list.dart';
+import 'package:flutter_wechat/providers/chat_message/chat_message.dart';
 import 'package:flutter_wechat/providers/contact/contact.dart';
 import 'package:flutter_wechat/providers/contact/contact_list.dart';
 import 'package:flutter_wechat/providers/group/group.dart';
@@ -216,6 +217,31 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
     );
   }
 
+  _addMessageTip(String groupId) async {
+    var chat = ChatListProvider.of(context, listen: false).map[groupId];
+    if (chat == null) return;
+    var contacts = ContactListProvider.of(context, listen: false).map;
+    String body = "您邀请了" +
+        _selects.map((friendId) {
+          return contacts[friendId]?.name ?? "*";
+        }).join("、") +
+        "加入群";
+
+    var message = ChatMessageProvider(
+        profileId: global.profile.profileId,
+        sendId: global.uuid,
+        sendTime: DateTime.now(),
+        sourceId: chat.sourceId,
+        fromFriendId: global.profile.friendId,
+        fromNickname: global.profile.name,
+        fromAvatar: global.profile.avatar,
+        status: ChatMessageStatus.complete,
+        type: MessageType.addGroupV2,
+        body: body);
+
+    await chat.addMessage(message);
+  }
+
   _save(BuildContext context) async {
     if (_selects.length == 0) return;
 
@@ -236,6 +262,8 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
       Provider.of<ChatListProvider>(context, listen: false).chats.add(chat);
       socket.open(false, group.groupId, () => chat.offset);
 
+      await _addMessageTip(_group.groupId);
+
       /// 这个位置最好返回群组信息
       /// 直接进入群聊聊天界面
       Routers.navigateTo(
@@ -250,6 +278,8 @@ class _GroupAddMemberPageState extends State<GroupAddMemberPage> {
         await toInviteJoinGroup(groupId: _group.groupId, friendIds: _selects);
     if (!rsp.success) return Toast.showToast(context, message: rsp.message);
     await _group.remoteUpdate(context);
+
+    await _addMessageTip(_group.groupId);
 
     /// 这个位置最好返回群组信息
     /// 直接进入群聊聊天界面

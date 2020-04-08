@@ -154,8 +154,16 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<ChatMessageProvider> addMessage(ChatMessageProvider message) async {
-    if (!await message.serialize(forceUpdate: true)) return message;
+  Future<bool> addMessage(ChatMessageProvider message) async {
+    if (this.offset < message.offset) this.offset = message.offset;
+    if (this.isContactChat && message.offset > global.profile.offset) {
+      global.profile.offset = message.offset;
+      global.profile.serialize();
+    }
+    if (!await message.serialize(forceUpdate: true)) {
+      this.serialize(forceUpdate: false);
+      return false;
+    }
     if (message.sendTime.compareTo(latestUpdateTime) > 0) {
       this.latestMsg = message;
     }
@@ -164,18 +172,14 @@ class ChatProvider extends ChangeNotifier {
     this.visible = true;
     this.unreadTag = false;
     this.unread += 1;
-    if (this.offset < message.offset) this.offset = message.offset;
-    if (this.isContactChat && message.offset > global.profile.offset) {
-      global.profile.offset = message.offset;
-      global.profile.serialize();
-    }
+
     if (activating) {
       this.unread = 0;
       this.unreadTag = false;
       this.messages.add(message);
     }
     await this.serialize(forceUpdate: true);
-    return message;
+    return true;
   }
 
   void forceUpdate() {

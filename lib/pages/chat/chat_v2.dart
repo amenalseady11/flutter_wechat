@@ -44,6 +44,10 @@ class ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    Future.microtask(() {
+      widget.chat?.group?.remoteUpdate(context);
+    });
+
     if (widget.chat.unreadTag || widget.chat.unread > 0) {
       widget.chat.unreadTag = false;
       widget.chat.unread = 0;

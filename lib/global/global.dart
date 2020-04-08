@@ -23,12 +23,13 @@ class _Global {
 
   /// 区分android,ios包时候，下划线问题，ios要转成大写
   get pkgName {
-    return pkg.packageName.replaceAll("_", "").toLowerCase();
+//    return pkg.packageName.replaceAll("_", "").toLowerCase();
+    return "imchat";
   }
 
   isPkgSchemes(String url) {
     if (url == null) return false;
-    var schemes = "imchat://${this.pkgName}?type=";
+    var schemes = "imchat://${this.pkgName}?t=";
     return url.startsWith(schemes);
   }
 

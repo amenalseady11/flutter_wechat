@@ -272,7 +272,8 @@ final SocketService socket = SocketService._()
 
     if (MessageType.addFriend == contentType ||
         MessageType.addGroup == contentType ||
-        MessageType.expelGroup == contentType) {
+        MessageType.expelGroup == contentType ||
+        MessageType.addGroupV2 == contentType) {
       var json2;
       try {
         json2 = jsonDecode(json['Body']);
@@ -294,11 +295,11 @@ final SocketService socket = SocketService._()
         json["SendTime"] = json["SendTime"] * 1000;
       } else if (MessageType.addGroup == contentType) {
         json['GroupID'] = json2['GroupID'];
-        json['Body'] = "你已被邀请到群组，可以开始聊天了";
+        json['Body'] = "您已被邀请到群组，可以开始聊天了";
         json["SendTime"] = json["SendTime"] * 1000;
       } else if (MessageType.expelGroup == contentType) {
         json['GroupID'] = json2['GroupID'];
-        json['Body'] = "你已被踢出群组";
+        json['Body'] = "您已被踢出群组";
         json["SendTime"] = json["SendTime"] * 1000;
       }
     }
@@ -331,12 +332,22 @@ final SocketService socket = SocketService._()
     var fromFriendId = json["FormId"] as String ?? "";
     if (fromFriendId.isEmpty) return;
 
-    /// TODO: 暂时过滤掉是自己的发消息，后期处理（需要判断是否已在数据库了）
-    if (fromFriendId == global.profile.friendId) return;
-
     var sendId = json["MessageId"] as String;
     if (sendId == null || sendId.isEmpty) sendId = global.uuid;
     int offset = json["Offset"] as int;
+
+    if (global.isDebug) {
+      LogUtil.v(
+          "收到消息:${private ? '私' : '群'}[$sourceId]$contentType(offset:$offset)：${DateUtil.formatDate(message.sendTime)}",
+          tag: _tag);
+      LogUtil.v(jsonStr, tag: _tag);
+    }
+
+    if (private && global.profile.offset < offset) {
+      global.profile.offset = offset;
+      global.profile.serialize();
+      offset = 0;
+    }
 
     message
       ..profileId = global.profile.profileId
@@ -362,6 +373,15 @@ final SocketService socket = SocketService._()
       message.sourceId = json['GroupID'];
       message.toFriendId = global.profile.friendId;
       sourceType = ChatSourceType.group;
+    }
+
+    if (message.type == MessageType.addGroupV2) {
+      var text = message.isSelf ? "您邀请了" : "${message.fromNickname}邀请了";
+      var list = json['json2'] as Iterable;
+      text += list.map((d) {
+        return d['FriendId'] == global.profile.friendId ? "您" : d["Remark"];
+      }).join("、");
+      message.body = text + "加入了群。";
     }
 
     ChatProvider chat;
@@ -447,7 +467,14 @@ final SocketService socket = SocketService._()
       }
     }
 
-    await chat.addMessage(message);
+    // TODO:临时过滤掉自己是群主的创建群组消息
+//    if (message.type == MessageType.addGroup && chat.latestMsg != null) return;
+
+    // 添加消息是否成功
+    // 解决同步消息问题
+    // 私聊话题也会收到自己的消息
+    // 添加消息没有成功，不做任何处理
+    if (!await chat.addMessage(message)) return;
 
     if (completer == null) {
       clp.sort(forceUpdate: true);
@@ -459,13 +486,6 @@ final SocketService socket = SocketService._()
 
     if (chat.activating) {
       chat.controller.add(message);
-    }
-
-    if (global.isDebug) {
-      LogUtil.v(
-          "收到消息:${private ? '私' : '群'}[$sourceId]$contentType(offset:$offset)：${DateUtil.formatDate(message.sendTime)}",
-          tag: _tag);
-      LogUtil.v(jsonStr, tag: _tag);
     }
     return;
   });

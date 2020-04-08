@@ -28,6 +28,10 @@ class ChatMessage extends StatelessWidget {
       return _buildTipMsg(context);
     }
 
+    if (message.type == MessageType.addGroupV2) {
+      return _buildTipMsg(context);
+    }
+
     if (message.type == MessageType.expelGroup) {
       return _buildTipMsg(context);
     }

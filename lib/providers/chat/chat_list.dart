@@ -86,28 +86,33 @@ class ChatListProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> delete(String sourceId, {bool real = false}) async {
+  Future<bool> delete(String sourceId,
+      {bool real = false, bool fix = false}) async {
     var profileId = global.profile.profileId;
     try {
-      var database = await SqfliteProvider().connect();
       var chat = map[sourceId];
+      var database = await SqfliteProvider().connect();
       chat.latestMsg = null;
       chat.messages.clear();
 
       // 删除消息
-      database.delete(ChatMessageProvider.tableName,
+      await database.delete(ChatMessageProvider.tableName,
           where: "profileId = ? and sourceId = ?",
           whereArgs: [profileId, sourceId]);
 
-      if (chat.isGroupChat && chat.group.status != GroupStatus.joined)
-        real = true;
-      if (chat.isContactChat && chat.contact.status != ContactStatus.friend)
-        real = true;
+      if (fix) {
+        chat.visible = false;
+        if (chat.isGroupChat && chat.group.status != GroupStatus.joined)
+          real = true;
+        if (chat.isContactChat && chat.contact.status != ContactStatus.friend)
+          real = true;
+      }
 
       if (!real) {
         chat.unreadTag = false;
         chat.top = false;
-        chat.visible = false;
+//        chat.visible = true;
+
         var rst = chat.serialize(forceUpdate: true);
         this.sort(forceUpdate: true);
         return rst;
@@ -125,7 +130,7 @@ class ChatListProvider extends ChangeNotifier {
 
       // 删除话题
       await database.delete(ChatProvider.tableName,
-          where: "profileId = ? and groupId = ?",
+          where: "profileId = ? and sourceId = ?",
           whereArgs: [profileId, sourceId]);
 
       this.sort(forceUpdate: true);

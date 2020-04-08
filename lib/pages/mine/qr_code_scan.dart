@@ -62,11 +62,11 @@ class _QrCodeScanPageState extends State<QrCodeScanPage> {
     if (global.isPkgSchemes(data)) {
       var uri = Uri.tryParse(data);
       if (uri != null) {
-        var type = uri.queryParameters['type'];
+        var type = uri.queryParameters['t'];
 
         // 手机名片
         if (type == "phone_qrcode") {
-          var phone = uri.queryParameters['phone'];
+          var phone = uri.queryParameters['p'];
           if (phone == global.profile.mobile) {
             if (await _toSkipPhonePage(phone)) return;
           }

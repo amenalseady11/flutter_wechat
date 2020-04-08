@@ -15,7 +15,8 @@ import 'package:flutter_wechat/widgets/action_sheet/action_sheet.dart';
 import 'package:flutter_wechat/widgets/avatar/avatar.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
+import 'package:qr/qr.dart';
 
 class QrCodePage extends StatefulWidget {
   @override
@@ -26,7 +27,7 @@ class _QrCodePageState extends State<QrCodePage> {
   var rePainKey = GlobalKey();
 
   get _qrCodeData {
-    return "imchat://${global.pkgName}?type=phone_qrcode&phone=${global.profile.mobile}&salt=${global.profile.salt}";
+    return "imchat://${global.pkgName}?t=phone_qrcode&p=${global.profile.mobile}&s=${global.profile.salt}";
   }
 
   @override
@@ -122,16 +123,25 @@ class _QrCodePageState extends State<QrCodePage> {
           RepaintBoundary(
             key: rePainKey,
             child: Container(
+              padding: EdgeInsets.all(ew(40)),
               color: Colors.white,
-              child: QrImage(
+              child: PrettyQr(
+                typeNumber: 6,
+                size: ew(-40.0 - 30 - 40 * 2),
+//                data: 'https://www.google.ru',
                 data: _qrCodeData,
-                errorCorrectionLevel: QrErrorCorrectLevel.L,
-                padding: EdgeInsets.all(ew(40)),
-                version: QrVersions.auto,
-                size: ew(-40.0 - 30),
-//              embeddedImage: NetworkImage(
-//                  ProfileProvider.of(context, listen: false).avatar),
+                errorCorrectLevel: QrErrorCorrectLevel.H,
+                roundEdges: true,
               ),
+//              child: QrImage(
+//                data: _qrCodeData,
+//                errorCorrectionLevel: QrErrorCorrectLevel.L,
+//                padding: EdgeInsets.all(ew(40)),
+//                version: QrVersions.auto,
+//                size: ew(-40.0 - 30),
+////              embeddedImage: NetworkImage(
+////                  ProfileProvider.of(context, listen: false).avatar),
+//              ),
             ),
           )
         ],

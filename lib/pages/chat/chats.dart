@@ -199,7 +199,7 @@ class ChatsPage extends StatelessWidget {
 
     if (str == "del_chat") {
       var clp = ChatListProvider.of(context, listen: false);
-      await clp.delete(chat.sourceId, real: false);
+      await clp.delete(chat.sourceId, real: false, fix: true);
     }
   }
 }

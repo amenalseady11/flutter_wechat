@@ -58,6 +58,8 @@ dependencies:
   image_cropper: ^1.2.1
   # 二维码 https://github.com/lukef/qr.flutter
   qr_flutter: ^3.2.0
+  # 二维码 https://github.com/promops/flutter_pretty_qr
+  pretty_qr_code: ^1.0.1
   # 保存相册 https://github.com/hui-z/image_gallery_saver
   image_gallery_saver: ^1.2.2
   # 权限 https://github.com/baseflowit/flutter-permission-handler

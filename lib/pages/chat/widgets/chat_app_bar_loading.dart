@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_wechat/providers/chat/chat.dart';
@@ -18,17 +20,26 @@ class AppBarLoading extends StatefulWidget {
 
 class _AppBarLoadingState extends State<AppBarLoading> {
   SocketConnectorState state;
+  StreamSubscription subscription;
   @override
   void initState() {
     super.initState();
     this.state = socket.getSocketConnectorState(
         private: widget.chat.isContactChat, sourceId: widget.chat.sourceId);
 
-    socket.listenConnectorState((event) {
-      if (event.sourceId != widget.chat.sourceId) return;
+    subscription = socket.listenConnectorState((event) {
+      var state = socket.getSocketConnectorState(
+          private: widget.chat.isContactChat, sourceId: widget.chat.sourceId);
+      if (state == this.state) return;
       this.state = event.state;
       if (mounted) setState(() {});
     });
+  }
+
+  @override
+  void dispose() {
+    subscription?.cancel();
+    super.dispose();
   }
 
   @override

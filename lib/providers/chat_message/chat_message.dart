@@ -121,18 +121,7 @@ class ChatMessageProvider extends ChangeNotifier {
 
       if (this.serializeId == null || this.serializeId.isNaN) {
         this.serializeId = null;
-
         if (profileId == null) profileId = global.profile.profileId;
-
-        if (this.offset > 0) {
-          var list = await database.query(ChatMessageProvider.tableName,
-              where: "profileId = ? and sourceId = ? and offset = ?",
-              whereArgs: [profileId, sourceId, offset]);
-          if (list != null && list.isNotEmpty)
-            throw new Exception(
-                "重复消息 profileId = $profileId and sourceId = $sourceId and offset = $offset");
-        }
-
         var rst = this.serializeId =
             await database.insert(ChatMessageProvider.tableName, this.toJson());
         LogUtil.v("插入消息信息:$rst", tag: "### ChatMessageProvider ###");
@@ -143,14 +132,12 @@ class ChatMessageProvider extends ChangeNotifier {
           ChatMessageProvider.tableName, this.toJson(),
           where: "serializeId = ?", whereArgs: [this.serializeId]);
       LogUtil.v("更新消息信息:$rst", tag: "### ChatMessageProvider ###");
-
+      if (forceUpdate) notifyListeners();
       return rst > 0;
     } catch (e) {
       LogUtil.v("聊天信息异常:$sourceId,$type", tag: "### ChatMessageProvider ###");
       LogUtil.e(e);
       return false;
-    } finally {
-      if (forceUpdate) notifyListeners();
     }
   }
 }
@@ -187,6 +174,9 @@ class MessageType {
 
   /// 添加群组消息，格式为一个json
   static const String addGroup = "add-to-group/json";
+
+  /// 添加群组消息，格式为一个json
+  static const String addGroupV2 = "add-to-group-v2/json";
 
   /// 踢出群组消息，格式为一个json
   static const String expelGroup = "expel-group/json";
